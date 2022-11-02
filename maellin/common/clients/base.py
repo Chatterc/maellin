@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractclassmethod
 
 
-class AbstractBaseClient(meta=ABCMeta):
+class AbstractBaseClient(metaclass=ABCMeta):
     """Abstract Base Class for Maellin Database Clients
     """
     
