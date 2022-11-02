@@ -9,26 +9,31 @@ from abc import ABCMeta, abstractclassmethod
 Task = TypeVar('Task')
 
 
-class AbstractTask(metaclass=ABCMeta):
+class AbstractBaseTask(metaclass=ABCMeta):
     """Abstract Base Class of Task that cannot be instantiated and must be 
     implemented by the BaseTask class
     """
+    @abstractclassmethod
+    def validate(self):
+        raise NotImplementedError('Abstract Method that needs to be implemented by the subclass')
     
     @abstractclassmethod
     def run(self):
         raise NotImplementedError('Abstract Method that needs to be implemented by the subclass')
 
 
-class BaseTask(AbstractTask, LoggingMixin):
-    """Concrete Base Task provides implementation to validate method for callables before running them
+class BaseTask(AbstractBaseTask, LoggingMixin):
+    """Base Task provides implementation to validate method for callables before running them
     
     Args:
         func (Task): A Python callable (usually a function)
     """
     
     def __init__(self, func: Callable) -> None:
+        super().__init__()
         self.tid = generate_uuid()
         self.func = func
+        self._log = self.logger
 
     def __input__(self) -> List:
         """Parses the arguments of func to a list of acceptable types
@@ -93,7 +98,9 @@ class BaseTask(AbstractTask, LoggingMixin):
                 + f"is incompatible with inputs from {self.func.__name__}"
             raise CompatibilityException(error)
 
+
         else:
+            self._log.info('Validation Check Complete for %s' % self.func.__name__)
             return True
 
     def run(self, *args, **kwargs) -> Any:
@@ -102,4 +109,9 @@ class BaseTask(AbstractTask, LoggingMixin):
         Returns:
             Any: 
         """
-        return self.func(*args, **kwargs)
+        self._log.info("Task %s :: Running %s" % (self.tid, self.func.__name__))
+        #self.func(**self.arguments)
+        try:
+            return self.func(*args, **kwargs)
+        except Exception as error:
+            self._log.exception(error, exc_info=True, stack_info=True)
