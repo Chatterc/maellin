@@ -1,21 +1,28 @@
 from asyncio import Queue as AsyncQueue
-from queue import Queue as Queue
+from queue import Queue as ThreadSafeQueue
 from multiprocessing import JoinableQueue
-from typing import TypeVar
-
-
-MaellinQueue = TypeVar("MaellinQueue", Queue, JoinableQueue, AsyncQueue)
+from typing import Union
 
 
 class QueueFactory:
-    """Factory class that returns a Maellin supported Queue"""
+    """Factory class that returns a supported queue type """
     @staticmethod
-    def factory(type: str) -> MaellinQueue:
+    def factory(type: str = 'default') -> Union[TreadSafeQueue, AsyncQueue, JoinableQueue] :
+        """Factory that returns a queue based on type
+
+        Args:
+            type (str): type of queue to use. Defaults to 
+            FIFO thread-safe queue. Other accepted types are "multi-processing"
+            "asyncio" or "multi-threading"
+
+        Returns:
+            Queue | JoinableQueue | AsyncQueue : Python Queue
+        """
         if type == 'default':
-            return Queue()
-        elif type == 'multithread':
-            return Queue()
-        elif type == 'multiprocess':
+            return TreadSafeQueue()
+        elif type == 'multi-threading':
+            return TreadSafeQueue()
+        elif type == 'multi-processing':
             return JoinableQueue()
         elif type == 'asyncio':
             return AsyncQueue()
