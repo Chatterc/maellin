@@ -36,7 +36,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
         self._log = self.logger
 
     def __input__(self) -> List:
-        """Parses the arguments of func to a list of acceptable types
+        """Gets the type annotations for all arguments in a python callable
 
         Returns:
             annotation_list: annotated list of acceptable types
@@ -45,7 +45,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
         return annotation_list
 
     def __output__(self) -> Any:
-        """Parses the Return type from func
+        """Gets the return type annotation for a python callable
 
         Returns:
             return_annotation : type annotation for the return statement of func
@@ -54,7 +54,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
             return_annotation = self.func.__annotations__['return']
             return return_annotation
         except:
-            raise MissingTypeHintException(f"No type hint was provided for the {self.func.__name__}'s return")
+            raise MissingTypeHintException(f"No type hint was provided for {self.func.__name__}'s return")
 
     def __str__(self) -> str:
         from pprint import pprint
@@ -98,7 +98,6 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
                 + f"is incompatible with inputs from {self.func.__name__}"
             raise CompatibilityException(error)
 
-
         else:
             self._log.info('Validation Check Complete for %s' % self.func.__name__)
             return True
@@ -110,8 +109,8 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
             Any: 
         """
         self._log.info("Task %s :: Running %s" % (self.tid, self.func.__name__))
-        #self.func(**self.arguments)
         try:
             return self.func(*args, **kwargs)
         except Exception as error:
             self._log.exception(error, exc_info=True, stack_info=True)
+            raise error
