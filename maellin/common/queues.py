@@ -7,7 +7,7 @@ from typing import Union
 class QueueFactory:
     """Factory class that returns a supported queue type """
     @staticmethod
-    def factory(type: str = 'default') -> Union[TreadSafeQueue, AsyncQueue, JoinableQueue] :
+    def factory(type: str = 'default') -> Union[ThreadSafeQueue, AsyncQueue, JoinableQueue] :
         """Factory that returns a queue based on type
 
         Args:
@@ -19,9 +19,9 @@ class QueueFactory:
             Queue | JoinableQueue | AsyncQueue : Python Queue
         """
         if type == 'default':
-            return TreadSafeQueue()
+            return ThreadSafeQueue()
         elif type == 'multi-threading':
-            return TreadSafeQueue()
+            return ThreadSafeQueue()
         elif type == 'multi-processing':
             return JoinableQueue()
         elif type == 'asyncio':
