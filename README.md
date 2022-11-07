@@ -50,6 +50,6 @@ This project structure should be used to help contributors understand where to "
 ---
 
 ## __Join the Conversation__
-__Slack Channel__
-__Discord__
+- __Slack Channel__
+- __Discord__
 
