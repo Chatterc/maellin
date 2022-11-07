@@ -6,6 +6,10 @@ Maellin.io is a lightweight workflows package for developing, scheduling, and mo
 
 ---
 
+## Maellin.io Philosphy
+Citizen Developers & Engineers are often asked to tackle use cases that require quick setup and ease of use to solve data problems quickly. The modern ETL stack is often inundated with packages that require massive amounts of setup, configuration and endless black holes of documentation before a solution can be developed. Too often, novice or intermediate users lack the knowledge and expertise to write their own reusable components for orchestrating data intesive tasks or end up over engineering a solution using a larger framework. Maellin.io aims to provide a ETL framework for small to medium sized workflows, with a focus on helping citizen devs and engineers catch bugs before the reach production. Maellin.io exposes developers to ETL concepts that will help them graduate steadily to more complex projects and tools as their use cases and expertise grow. 
+
+---
 ## Project Structure:
 *   `.build` - This folder contains scripts related to the building the appplication (ex: Docker compose)
 *   `.config` - This folder for configuration files (Example: `.json`, `.yaml`, `.toml`, `.ini`)
