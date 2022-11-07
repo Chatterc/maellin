@@ -1,9 +1,6 @@
-from cmath import asin
-import os
 import time
 import asyncio
 
-os.chdir(path='./../')
 from maellin.common.tasks import BaseTask as Task
 from maellin.common.queues import QueueFactory
 
