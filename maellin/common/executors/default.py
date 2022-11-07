@@ -1,12 +1,13 @@
 from maellin.common.executors.base import BaseExecutor
 from maellin.common.utils import get_task_result
+from maellin.common.logger import LoggingMixin
 from typing import TypeVar
 
 
 Queue = TypeVar('Queue')
 
     
-class DefaultWorker:
+class DefaultWorker(LoggingMixin):
     """
     A Local based Worker that processes tasks sequentially.
     This worker does not support concurrency features
@@ -17,6 +18,7 @@ class DefaultWorker:
         DefaultWorker.worker_id += 1
         self.task_queue = task_queue
         self.result_queue = result_queue
+        self._log = self.logger
         
     def run(self):
         
@@ -24,13 +26,14 @@ class DefaultWorker:
             # Get the activity from the queue to process
             _task = self.task_queue.get()
             _task.update_status('Running')
+            self._log.info('Running Task %s on Worker %s ' % (_task.name, self.worker_id))
 
             # Get inputs to use from dependencies
             if _task.depends_on:
                 inputs = ()
                 for dep_task in list(dict.fromkeys(_task.depends_on).keys()):
                     for completed_task in list(self.result_queue.queue):
-                        if dep_task.tid == completed_task.task.tid:
+                        if dep_task.tid == completed_task.tid:
                             input_data = get_task_result(completed_task)
                             inputs = inputs + input_data
             else:
