@@ -161,4 +161,4 @@ def create_task(inputs: Union[Task, Tuple]):
     if isinstance(inputs, Task):
         return inputs
     task = Task(*inputs)
-    return Task
+    return task
