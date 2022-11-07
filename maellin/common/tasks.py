@@ -1,9 +1,10 @@
-from typing import Any, Callable, TypeVar, List
+from abc import ABCMeta, abstractclassmethod
 from inspect import signature
 from maellin.common.logger import LoggingMixin
 from maellin.common.exceptions import CompatibilityException, MissingTypeHintException
 from maellin.common.utils import generate_uuid
-from abc import ABCMeta, abstractclassmethod
+
+from typing import Any, Callable, TypeVar, List, Union, Dict, Type, Tuple, Literal
 
 
 Task = TypeVar('Task')
@@ -99,18 +100,65 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
             raise CompatibilityException(error)
 
         else:
-            self._log.info('Validation Check Complete for %s' % self.func.__name__)
             return True
 
-    def run(self, *args, **kwargs) -> Any:
+    def _run(self, *args, **kwargs) -> Any:
         """Executes the python Callable
 
         Returns:
             Any: 
         """
-        self._log.info("Task %s :: Running %s" % (self.tid, self.func.__name__))
         try:
             return self.func(*args, **kwargs)
         except Exception as error:
             self._log.exception(error, exc_info=True, stack_info=True)
             raise error
+
+
+class Task(BaseTask):
+
+    def __init__(
+            self,
+            func: Callable,
+            kwargs: Dict = {},
+            depends_on: List = None,
+            skip_validation: bool = False,
+            name: str = None,
+            desc: str = None) -> None:
+
+        super().__init__(func=func)
+        self.kwargs = kwargs
+        self.depends_on = depends_on
+        self.skip_validation = skip_validation
+        self.name = name
+        self.desc = desc
+        self.status = "Not Started"
+        self.related = []
+        self.result = None
+
+    def __str__(self) -> str:
+        from pprint import pprint
+        s = dict()
+        s['Activity'] = self.__dict__.copy()
+        return str(pprint(s))
+
+    def __repr__(self) -> str:
+        return "<class '{}({})>'".format(
+            self.__class__.__name__,
+            ''.join('{}={!r}, '.format(k, v) for k, v in self.__dict__.items())
+        )
+
+    def update_status(self, status: Literal['Not Started', 'Queued', 'Running',
+                      'Completed', 'Failed'] = 'Not Started') -> None:
+        """Updates the Status of an Activity throughout processing"""
+        self.status = status
+
+    def run(self, inputs:tuple):
+        self.result = self._run(*inputs, **self.kwargs)
+
+
+def create_task(inputs: Union[Task, Tuple]):
+    if isinstance(inputs, Task):
+        return inputs
+    task = Task(*inputs)
+    return Task
