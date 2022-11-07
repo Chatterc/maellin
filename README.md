@@ -27,8 +27,9 @@ This project structure should be used to help contributors understand where to "
 
 ---
 
-## __Getting Started__ 
-### Basic Usage
+## __Getting Started__
+
+### `Basic Usage`
 #### Installation
 #### Using Tasks
 #### Using Workflows
@@ -36,7 +37,7 @@ This project structure should be used to help contributors understand where to "
 #### Using Single or Multiple Workers
 #### Using the Scheduler
 
-### Advanced Usage
+### `Advanced Usage`
 #### Launching Maellin.io Web Server
 #### Using the Maellin.io CLI
 
