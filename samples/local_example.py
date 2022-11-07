@@ -1,3 +1,11 @@
+# ============================ SAMPLE ============================ #
+# This sample uses the DVD Rental Sample Database for PostgreSQL.  #
+# This package does not install PostgreSQL but offers an API for   # 
+# working with PostgreSQL and executing SQL Queries. We do not     #
+# make any depedencies to use a particular ORM at this time.       #
+# This example demonstrats how a user's python code can be         #
+# compiled into DAG containing Tasks to execute.                   #
+
 import pandas as pd
 from psycopg import Connection, Cursor
 from pypika import PostgreSQLQuery
@@ -8,13 +16,13 @@ from maellin.common.clients.postgres import PostgresClient
 from typing import List
 
 
-#################### PARAMETERS ####################
+# ============================ PARAMETERS ============================ #
 DATABASE_CONFIG = '.config\.postgres'
 SECTION = 'postgresql'
 DW = Schema('dssa')
 
 
-#################### TABLE DEFINITIONS ####################
+# ============================ TABLE DEFINITIONS ============================ #
 FACT_RENTAL = (
     Column('sk_customer', 'INT', False),
     Column('sk_date', 'INT', False),
@@ -64,7 +72,7 @@ DIM_STORE = (
 )
 
 
-#################### FUNCTIONS ####################
+# ============================ FUNCTIONS ============================ #
 def create_cursor(path:str, section:str) -> Cursor:
     client = PostgresClient()
     conn = client.connect_from_config(path, section, autocommit=True)
@@ -114,7 +122,7 @@ def tear_down(cursor: Cursor) -> None:
 
 
 def main():
-    #################### WORKFLOWS ####################
+    # ============================ MAELLIN WORKFLOWS ============================ #
     setup_dw_workflow = Pipeline(
         steps=[
             Task(create_cursor, 
@@ -156,19 +164,21 @@ def main():
         type='default'
     )
 
-    #################### COMPILATION ####################
+    # ============================ COMPILATION ============================ #
     setup_dw_workflow.compose()
 
 
-    #################### ENQUEUE ####################
+    # ============================ ENQUEUE ============================ #
     setup_dw_workflow.collect()
 
 
-    #################### EXECUTION ####################
-    # To run Workflow locally - good for debugging
+    # ============================ EXECUTION ============================ #
+    # To run a Maellin Workflow locally using a single worker
+    # This option is good for debugging before presisting the workflow 
+    # and submitting it to the scheduler.
     setup_dw_workflow.run()
     
-    # To schedule Dag to run
+    # To schedule Dag to run by submitting it to the scheduler
     # setup_dw_workflow.submit()
     
 if __name__ == '__main__':
