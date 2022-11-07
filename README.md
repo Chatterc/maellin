@@ -25,7 +25,10 @@ This project structure should be used to help contributors understand where to "
 *   `requirements.txt` - list of python libraries to install with `pip`
 *   `setup.py` - setup script for packaging the project. 
 
-## Getting Started - Basic Usage
+---
+
+## Getting Started 
+### Basic Usage
 #### Installation
 #### Using Tasks
 #### Using Workflows
@@ -34,7 +37,7 @@ This project structure should be used to help contributors understand where to "
 #### Using the Scheduler
 
 ---
-## Advanced Usage
+### Advanced Usage
 #### Launching Maellin.io Web Server
 #### Using the Maellin.io CLI
 
