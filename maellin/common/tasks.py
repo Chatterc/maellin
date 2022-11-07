@@ -24,11 +24,7 @@ class AbstractBaseTask(metaclass=ABCMeta):
 
 
 class BaseTask(AbstractBaseTask, LoggingMixin):
-    """Base Task provides implementation to validate method for callables before running them
-    
-    Args:
-        func (Task): A Python callable (usually a function)
-    """
+    """Base Task provides implementation to validate method for callables before running them"""
     
     def __init__(self, func: Callable) -> None:
         super().__init__()
@@ -103,11 +99,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
             return True
 
     def _run(self, *args, **kwargs) -> Any:
-        """Executes the python Callable
-
-        Returns:
-            Any: 
-        """
+        """Executes the python Callable"""
         try:
             return self.func(*args, **kwargs)
         except Exception as error:
@@ -139,7 +131,7 @@ class Task(BaseTask):
     def __str__(self) -> str:
         from pprint import pprint
         s = dict()
-        s['Activity'] = self.__dict__.copy()
+        s['Task'] = self.__dict__.copy()
         return str(pprint(s))
 
     def __repr__(self) -> str:
@@ -150,7 +142,7 @@ class Task(BaseTask):
 
     def update_status(self, status: Literal['Not Started', 'Queued', 'Running',
                       'Completed', 'Failed'] = 'Not Started') -> None:
-        """Updates the Status of an Activity throughout processing"""
+        """Updates the Status of a Task during Execution"""
         self.status = status
 
     def run(self, inputs:tuple):
