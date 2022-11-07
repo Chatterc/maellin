@@ -12,7 +12,7 @@ from typing import Any, Callable, Dict, List, Literal, Tuple, Type, Union
 
 
 class Pipeline(DAG, LoggingMixin):
-    """A Directed Acyclic MultiGraph based Pipeline for Data Processing. 
+    """A Directed Acyclic MultiGraph based Pipeline for Data Processing.
     """
 
     pipeline_id = 0
@@ -36,7 +36,7 @@ class Pipeline(DAG, LoggingMixin):
         pipeline.compose(self)
         G = pipeline.dag
         self.dag = self.merge(G, self.dag)
-        self.repair_attributes(G, self.dag, 'activities')
+        self.repair_attributes(G, self.dag, 'tasks')
 
 
     def _proc_pipeline_dep(self, idx, task, dep):
@@ -50,8 +50,8 @@ class Pipeline(DAG, LoggingMixin):
             task.validate(dep_task)
 
         # Update the task with uuids of related runs
-        if dep.dag.nodes[dep_task.tid].get('activities', None) is not None:
-            for k in dep.dag.nodes[dep_task.tid]['activities'].keys():
+        if dep.dag.nodes[dep_task.tid].get('tasks', None) is not None:
+            for k in dep.dag.nodes[dep_task.tid]['tasks'].keys():
                 task.related.append(k)
         else:
             raise DependencyError(f'{dep} was not found in {self.__name__}, check pipeline steps.')
@@ -61,7 +61,7 @@ class Pipeline(DAG, LoggingMixin):
 
         return (task, dep_task)
 
-    def _proc_activity_dep(self, idx: int, task: Task, dep: str, input_pipe: "Pipeline"):
+    def _proc_named_dep(self, idx: int, task: Task, dep: str, input_pipe: "Pipeline"):
         """Process Dependencies that contain a reference to another task"""
         # this is very ugly and needs to be refactored
         try:
@@ -79,8 +79,8 @@ class Pipeline(DAG, LoggingMixin):
             self._log.info('Validation Check Complete for %s :: %s' % (task.func.__name__, task.name))
 
         # Lookup dependent task from the current pipeline or the calling pipeline
-        if dag.nodes[dep_task.tid].get('activities', None) is not None:
-            for k in dag.nodes[dep_task.tid]['activities'].keys():
+        if dag.nodes[dep_task.tid].get('tasks', None) is not None:
+            for k in dag.nodes[dep_task.tid]['tasks'].keys():
                 task.related.append(k)
         else:
             raise DependencyError(f'{dep_task} was not found in {self.__name__}, check pipeline steps.')
@@ -99,10 +99,10 @@ class Pipeline(DAG, LoggingMixin):
         pipe = self
         if dep.tid not in self.dag:
             pipe = input_pipe
-        if pipe.dag.nodes[dep.tid].get('activities', None) is not None:
-            for k in pipe.dag.nodes[dep.tid]['activities'].keys():
-                for act in pipe.steps:
-                    if k == act.id:
+        if pipe.dag.nodes[dep.tid].get('tasks', None) is not None:
+            for k in pipe.dag.nodes[dep.tid]['tasks'].keys():
+                for tsk in pipe.steps:
+                    if k == tsk.id:
                         task.related.append(k)
         else:
             raise DependencyError(f'{dep} was not found in {self.__name__}, check pipeline steps.')
@@ -115,7 +115,7 @@ class Pipeline(DAG, LoggingMixin):
         if isinstance(dep, Pipeline):
             return self._proc_pipeline_dep(idx, task, dep)
         elif isinstance(dep, str):
-            return self._proc_activity_dep(idx, task, dep, input_pipe)
+            return self._proc_named_dep(idx, task, dep, input_pipe)
         elif issubclass(type(dep), Task):
             return self._proc_task_dep(task, dep, input_pipe)
         else:
@@ -181,11 +181,11 @@ class Pipeline(DAG, LoggingMixin):
         Returns:
             Task: The task that matches the name parameter.
         """
-        for act_attrs in self.get_all_attributes(name='activities'):
-            if act_attrs is not None:
-                for act in act_attrs.values():
-                    if act.name == name:
-                        return act
+        for tsk_attrs in self.get_all_attributes(name='tasks'):
+            if tsk_attrs is not None:
+                for tsk in tsk_attrs.values():
+                    if tsk.name == name:
+                        return tsk
 
         raise NotFoundError(f"{name} was not found in the DAG")
 
@@ -238,8 +238,8 @@ class Pipeline(DAG, LoggingMixin):
         for task_node_id in self.topological_sort():
             # Lookup each task in a node
             n_attrs = nodes[task_node_id]
-            # Enqueue Activities & update status
-            for v in n_attrs['activities'].values():
+            # Enqueue Tasks & update status
+            for v in n_attrs['tasks'].values():
                 self.queue.put(v)
                 v.update_status('Queued')
 

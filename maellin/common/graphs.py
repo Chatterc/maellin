@@ -1,8 +1,8 @@
 
 from typing import Dict, List, Type, TypeVar
 from uuid import uuid4
-
 from maellin.common.exceptions import CircularDependencyError, MissingDependencyError
+from maellin.common.tasks import Task
 from networkx import (
     MultiDiGraph,
     compose,
@@ -12,9 +12,6 @@ from networkx import (
     is_empty,
     topological_sort
 )
-
-
-Activity = TypeVar('Activity')
 
 
 class DAG:
@@ -56,30 +53,30 @@ class DAG:
         return compose(G, H)
 
     def add_node_to_dag(self,
-                        activity: Type[Activity] = None,
+                        task: Type[Task] = None,
                         properties: Dict = None) -> None:
         """Adds a new Node to the DAG with attributes
 
         Args:
-            activity (Type[Activity], optional): Activity Instance. Defaults to None.
+            task (Type[Task], optional): Task Instance. Defaults to None.
             properties (Dict, optional): User Properties. Defaults to None.
         """
         # if the node already exists
-        if activity.tid in list(self.dag.nodes):
-            existing = dict(self.dag.nodes(data='activities')).get(activity.tid, None)
+        if task.tid in list(self.dag.nodes):
+            existing = dict(self.dag.nodes(data='tasks')).get(task.tid, None)
             if existing is not None:
-                updates = existing.update({activity.tid: activity})
+                updates = existing.update({task.tid: task})
                 return
             else:
-                updates = {activity.tid: activity}
+                updates = {task.tid: task}
         else:
-            updates = {activity.tid: activity}
+            updates = {task.tid: task}
         # Add a new node to the DAG
         self.dag.add_nodes_from([
             (
-                activity.tid, {
-                    "id": activity.tid,
-                    "activities": updates,
+                task.tid, {
+                    "id": task.tid,
+                    "tasks": updates,
                     "properties": properties
                 }
             )
@@ -96,7 +93,7 @@ class DAG:
         Args:
             tid_from (int): The dependency Task unique ID "tid"
             tid_to (int): The Task unique ID "tid"
-            activity_id (uuid): Activity Id used to define the edge
+            activity_id (uuid): Task Id used to define the edge
         """
         # Add the edge to the DAG
         self.dag.add_edges_from([
@@ -105,7 +102,6 @@ class DAG:
                     "pid": pid,
                     "tid_from": tid_from,
                     "tid_to": tid_to,
-
                 }
             )
         ])
