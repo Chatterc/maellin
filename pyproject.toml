@@ -3,7 +3,7 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "example_package_YOUR_USERNAME_HERE"
+name = "Maellin"
 version = "0.0.4"
 authors = [
   { name="Carl Chatterton", email="Carl.Chatterton@maellin.io" },
