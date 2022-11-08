@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Maellin"
-version = "0.0.4"
+version = "0.0.1"
 authors = [
   { name="Carl Chatterton", email="Carl.Chatterton@maellin.io" },
 ]
@@ -18,7 +18,23 @@ classifiers = [
     "Operating System :: OS Independent",
     "Framework :: Maellin",
 ]
+requires = ["setuptools"]
+dependencies = [
+    "pywin32 >= 1.0; platform_system=='Windows'",
+    "psycopg==3.1.*",
+    "pandas==1.5.*",
+    "networkx==2.8.*"
+]
+
+
 
 [project.urls]
 "Homepage" = "https://github.com/Chatterc/maellin"
 "Bug Tracker" = "https://github.com/Chatterc/maellin/issues"
+
+
+[tool.setuptools.packages.find]
+where = ["maellin"]  # ["."] by default
+include = ["maellin*"]  # ["*"] by default
+exclude = ["maellin.tests*"]  # empty by default
+namespaces = false  # true by default

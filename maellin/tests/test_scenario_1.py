@@ -1,13 +1,13 @@
 import unittest
 
 import pandas as pd
-from cne.pipelines.pipeline import Pipeline
-from cne.pipelines.tasks import Task
+from maellin.common.workflows import Pipeline
+from maellin.common.tasks import Task
 from pandas.testing import assert_frame_equal
 
 
 def load_ssm(zone: str) -> pd.DataFrame:
-    fn = f"cne/data/example_1/solar_{zone}.csv"
+    fn = f"maellin/data/example_1/solar_{zone}.csv"
     df = pd.read_csv(fn, index_col=0)
     return df
 
@@ -20,7 +20,7 @@ def prep_ssm(df: pd.DataFrame) -> pd.DataFrame:
 
 def load_load(zone: str, loadtype: str) -> pd.DataFrame:
     zone_loadtype = f"{zone}_{loadtype}"
-    fn = "cne/data/example_1/inputdata.csv"
+    fn = "maellin/data/example_1/inputdata.csv"
     df = pd.read_csv(fn, index_col=0)
     df = df[df.zone_loadtype == zone_loadtype]
     assert len(df) > 0
@@ -66,7 +66,7 @@ def scenario():
         (tailt, {'num': 5}, [merget]),
     ]
 
-    pipeline = Pipeline(steps, gc_enabled=False)
+    pipeline = Pipeline(steps)
     pipeline.run()
     return pipeline
 
@@ -74,10 +74,10 @@ def scenario():
 class TestTuringSceanrio(unittest.TestCase):
 
     def setUp(self):
-        self.results_head = pd.read_csv('cne/data/example_1/head.csv', index_col=0)
+        self.results_head = pd.read_csv('maellin/data/example_1/head.csv', index_col=0)
         self.results_head['date'] = pd.to_datetime(self.results_head['date'])
 
-        self.results_tail = pd.read_csv('cne/data/example_1/tail.csv', index_col=0)
+        self.results_tail = pd.read_csv('maellin/data/example_1/tail.csv', index_col=0)
         self.results_tail['date'] = pd.to_datetime(self.results_tail['date'])
 
     def test_scenario_1(self):

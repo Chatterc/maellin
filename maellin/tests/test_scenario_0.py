@@ -2,16 +2,16 @@ from typing import List, Union
 import unittest
 
 import pandas as pd
-from cne.pipelines.pipeline import Activity, Pipeline
-from cne.pipelines.tasks import Task
+from maellin.common.workflows import Pipeline
+from maellin.common.tasks import Task
 from pandas.testing import assert_frame_equal
 
 
 # ====================== PARAMETERS ====================== #
-dimA = 'cne/data/example_0/dim_a.csv'
-dimB = 'cne/data/example_0/dim_b.csv'
-dimC = 'cne/data/example_0/dim_c.csv'
-factTbl = 'cne/data/example_0/fact_tbl.csv'
+dimA = 'maellin/data/example_0/dim_a.csv'
+dimB = 'maellin/data/example_0/dim_b.csv'
+dimC = 'maellin/data/example_0/dim_c.csv'
+factTbl = 'maellin/data/example_0/fact_tbl.csv'
 
 
 # ====================== FUNCTIONS ====================== #
@@ -61,12 +61,12 @@ def scenario():
     # Subpipeline to to join Cust Features
     custPipe = Pipeline(
         steps=[
-            Activity(
+            Task(
                 task=(read_table),
                 kwargs={
                     'path': dimC},
                 name='read_cust'),
-            Activity(
+            Task(
                 task=(select_target_cols),
                 kwargs={
                     'target_schema': [
@@ -79,10 +79,10 @@ def scenario():
     # Subpipeline to to join BillGroup Features
     bgPipe = Pipeline(
         steps=[
-            Activity(
+            Task(
                 task=(read_table), kwargs={
                     'path': dimB}, name='read_bg'),
-            Activity(
+            Task(
                 task=(select_target_cols), kwargs={
                     'target_schema': [
                         'BId', 'BNo', 'CId']},
@@ -95,10 +95,10 @@ def scenario():
     # Subpipeline to to join Account Features
     acctPipe = Pipeline(
         steps=[
-            Activity(
+            Task(
                 task=(read_table), kwargs={
                     'path': dimA}, name="read_acct"),
-            Activity(
+            Task(
                 task=(select_target_cols), kwargs={
                     'target_schema': [
                         'AId', 'ANo', 'BId']},
@@ -111,7 +111,7 @@ def scenario():
 
     exceptPipe = Pipeline(
         steps=[
-            Activity(task=drop_duplicates,
+            Task(task=drop_duplicates,
                      name='dropDups',
                      depends_on=['read_aging'],
                      kwargs={'columns': 'AId'})
@@ -121,13 +121,12 @@ def scenario():
     # Main Pipeline for Curating Dimension table and writes data to a sink
     pipeline = Pipeline(
         steps=[
-            Activity(task=(read_table), kwargs={'path': factTbl}, name='read_aging'),
+            Task(task=(read_table), kwargs={'path': factTbl}, name='read_aging'),
             (acctPipe, {}, None),
             (exceptPipe, {}, ['read_aging']),
             (join, {'on': 'AId', 'how': 'inner'}, [acctPipe, 'read_aging']),
             # (sink, {'path':'.workingfiles/output2.csv'}, [join])
-        ],
-        gc_enabled=False
+        ]
     )
     pipeline.run()
     return pipeline
