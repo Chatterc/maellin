@@ -15,16 +15,16 @@ Citizen Developers & Engineers are often asked to tackle use cases that require 
 This project structure should be used to help contributors understand where to "find" things and where to "put" new things. 
 *   `.build` - This folder contains scripts related to the building the appplication (ex: Docker compose)
 *   `.config` - This folder for configuration files (Example: `.json`, `.yaml`, `.toml`, `.ini`)
-*   `.github` - folder for instructions related to contributing to the project
-*   `.workflows` - ci/cd folder containing YAML files for github actions
+*   `.github` - folder for instructions related to contributing to the project & YAML files for github actions
 *   `docs` - Documentation about Maellin.io Workflows Package.
 *   `samples` - Place for getting started tutorials.
 *   `maellin` - This is the source code folder containing all application code and modules.
 *   `tools` - A place for automation related scripts.
 *   `LICENSE` - Open source license markdown
 *   `README` - Markdown file describing the project
+*   `SECURITY` - Markdown file for vunerability reporting
 *   `requirements.txt` - list of python libraries to install with `pip`
-*   `setup.py` - setup script for packaging the project. 
+*   `pyproject.toml` - toml file for building maellin whl for packaging the project. 
 
 ---
 
