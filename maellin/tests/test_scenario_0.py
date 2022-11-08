@@ -112,9 +112,9 @@ def scenario():
     exceptPipe = Pipeline(
         steps=[
             Task(task=drop_duplicates,
-                     name='dropDups',
-                     depends_on=['read_aging'],
-                     kwargs={'columns': 'AId'})
+                 name='dropDups',
+                 depends_on=['read_aging'],
+                 kwargs={'columns': 'AId'})
         ]
     )
 
