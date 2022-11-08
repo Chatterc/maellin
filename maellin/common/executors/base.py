@@ -5,14 +5,15 @@ from typing import TypeVar
 
 Queue = TypeVar('Queue')
 
+
 class AbstractBaseExecutor(metaclass=ABCMeta):
     """Abstract Base Class for Maellin Executors"""
-    
+
     @abstractclassmethod
     def start(self):
         """Executors may need to get things started."""
         return NotImplementedError('Abstract Method that needs to be implemented by the subclass')
-    
+
     @abstractclassmethod
     def stop(self):
         """Executors may need to get things started."""
@@ -20,10 +21,10 @@ class AbstractBaseExecutor(metaclass=ABCMeta):
 
 
 class BaseExecutor(AbstractBaseExecutor, LoggingMixin):
-     
+
     job_id = generate_uuid()
 
-    def __init__(self, task_queue:Queue, result_queue:Queue):
+    def __init__(self, task_queue: Queue, result_queue: Queue):
         super().__init__()
         self.task_queue = task_queue
         self.result_queue = result_queue
@@ -32,7 +33,7 @@ class BaseExecutor(AbstractBaseExecutor, LoggingMixin):
     def start(self):
         """Starts workers for processing Tasks"""
         return
-    
+
     def stop(self):
         """Stops Execution of Tasks"""
         return

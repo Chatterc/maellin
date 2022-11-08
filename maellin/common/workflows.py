@@ -1,14 +1,11 @@
-import gc
 import cloudpickle as cpickle
 from maellin.common.logger import LoggingMixin
 from maellin.common.graphs import DAG
 from maellin.common.queues import QueueFactory
 from maellin.common.tasks import Task, create_task
 from maellin.common.executors.default import DefaultExecutor
-from maellin.common.utils import generate_uuid
-from maellin.common.exceptions import (ActivityFailedError, DependencyError,
-                                 NotFoundError)
-from typing import Any, Callable, Dict, List, Literal, Tuple, Type, Union
+from maellin.common.exceptions import DependencyError, NotFoundError
+from typing import Any, List, Literal, Tuple
 
 
 class Pipeline(DAG, LoggingMixin):
@@ -38,7 +35,6 @@ class Pipeline(DAG, LoggingMixin):
         self.dag = self.merge(G, self.dag)
         self.repair_attributes(G, self.dag, 'tasks')
 
-
     def _proc_pipeline_dep(self, idx, task, dep):
         """Process Dependencies that contain another Pipeline
         """
@@ -67,7 +63,7 @@ class Pipeline(DAG, LoggingMixin):
         try:
             dep_task = self.get_task_by_name(name=dep)
             dag = self.dag
-        except:
+        except BaseException:
             dep_task = input_pipe.get_task_by_name(name=dep)
             dag = input_pipe.dag
 
@@ -246,20 +242,19 @@ class Pipeline(DAG, LoggingMixin):
     def run(self) -> Any:
         """Allows for Local Execution of a Pipeline Instance. Good for Debugging
         for advanced features and concurrency support use submit"""
-        
+
         # If Queue is empty, populate it
         if self.queue.empty():
             self.collect()
-        
+
         # Setup Default Executor
         executor = DefaultExecutor(
-            task_queue=self.queue, 
+            task_queue=self.queue,
             result_queue=QueueFactory.factory('default'))
-        
+
         # Start execution of Tasks
         self._log.info('Starting Execution')
         executor.start()
-        
 
     def submit(self) -> Any:
         """Submits DAG to the Scheduler"""

@@ -7,11 +7,11 @@ from typing import Union
 class QueueFactory:
     """Factory class that returns a supported queue type """
     @staticmethod
-    def factory(type: str = 'default') -> Union[ThreadSafeQueue, AsyncQueue, JoinableQueue] :
+    def factory(type: str = 'default') -> Union[ThreadSafeQueue, AsyncQueue, JoinableQueue]:
         """Factory that returns a queue based on type
 
         Args:
-            type (str): type of queue to use. Defaults to 
+            type (str): type of queue to use. Defaults to
             FIFO thread-safe queue. Other accepted types are "multi-processing"
             "asyncio" or "multi-threading"
 

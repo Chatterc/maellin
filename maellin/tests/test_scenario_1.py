@@ -84,8 +84,9 @@ class TestTuringSceanrio(unittest.TestCase):
         try:
             results = scenario()
             status = "SUCCESS"
-        except:
+        except Exception as e:
             status = "FAILED"
+            raise e
 
         self.assertTrue(status == "SUCCESS")
         assert_frame_equal(results.steps[-1].result, self.results_tail)

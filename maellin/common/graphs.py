@@ -1,5 +1,5 @@
 
-from typing import Dict, List, Type, TypeVar
+from typing import Dict, List, Type
 from uuid import uuid4
 from maellin.common.exceptions import CircularDependencyError, MissingDependencyError
 from maellin.common.tasks import Task

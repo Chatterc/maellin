@@ -4,20 +4,20 @@ from maellin.common.logger import LoggingMixin
 from maellin.common.exceptions import CompatibilityException, MissingTypeHintException
 from maellin.common.utils import generate_uuid
 
-from typing import Any, Callable, TypeVar, List, Union, Dict, Type, Tuple, Literal
+from typing import Any, Callable, TypeVar, List, Union, Dict, Tuple, Literal
 
 
 Task = TypeVar('Task')
 
 
 class AbstractBaseTask(metaclass=ABCMeta):
-    """Abstract Base Class of Task that cannot be instantiated and must be 
+    """Abstract Base Class of Task that cannot be instantiated and must be
     implemented by the BaseTask class
     """
     @abstractclassmethod
     def validate(self):
         raise NotImplementedError('Abstract Method that needs to be implemented by the subclass')
-    
+
     @abstractclassmethod
     def run(self):
         raise NotImplementedError('Abstract Method that needs to be implemented by the subclass')
@@ -25,7 +25,7 @@ class AbstractBaseTask(metaclass=ABCMeta):
 
 class BaseTask(AbstractBaseTask, LoggingMixin):
     """Base Task provides implementation to validate method for callables before running them"""
-    
+
     def __init__(self, func: Callable) -> None:
         super().__init__()
         self.tid = generate_uuid()
@@ -50,7 +50,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
         try:
             return_annotation = self.func.__annotations__['return']
             return return_annotation
-        except:
+        except BaseException:
             raise MissingTypeHintException(f"No type hint was provided for {self.func.__name__}'s return")
 
     def __str__(self) -> str:
@@ -145,7 +145,7 @@ class Task(BaseTask):
         """Updates the Status of a Task during Execution"""
         self.status = status
 
-    def run(self, inputs:tuple):
+    def run(self, inputs: tuple):
         self.result = self._run(*inputs, **self.kwargs)
 
 
