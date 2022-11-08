@@ -2,11 +2,11 @@
 
 ## Supported Versions
 
-Below Project versions are supported with security updates
+Below Project versions are supported with on going security updates
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.1.x   | :white_check_mark: |               |
+| < 1.x.x   | :white_check_mark: |               |
 
 ## Reporting a Vulnerability
 
