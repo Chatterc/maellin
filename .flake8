@@ -1,6 +1,19 @@
 [flake8]
+ignore = 
+    W503, #This is now an anti-pattern
+    H306,
+    H903, 
+    E266,
+    E722, 
+    D203, 
+    C901
 extend-ignore = E203
 exclude =
+    .venv,
+    .vscode,
+    .funcignore
+    .pytest_cache
+    .python_packages
     .git,
     __pycache__,
     .build,
