@@ -1,7 +1,8 @@
 import time
 import asyncio
+import os
 
-from maellin.common.tasks import BaseTask as Task
+from maellin.common.tasks import Task
 from maellin.common.queues import QueueFactory
 
 

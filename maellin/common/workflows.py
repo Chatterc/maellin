@@ -3,7 +3,7 @@ from maellin.common.logger import LoggingMixin
 from maellin.common.graphs import DAG
 from maellin.common.queues import QueueFactory
 from maellin.common.tasks import Task, create_task
-from maellin.common.executors.default import DefaultExecutor
+from maellin.common.executors.default import DefaultExecutor, AsyncIOExecutor
 from maellin.common.exceptions import DependencyError, NotFoundError
 from typing import Any, List, Literal, Tuple
 
@@ -23,7 +23,7 @@ class Pipeline(DAG, LoggingMixin):
         super().__init__()
         self.pid = Pipeline.pipeline_id
         self.steps = [create_task(step) for step in steps]
-        self.queue = QueueFactory.factory(type=type)
+        self.type = type
         self._log = self.logger
 
     def _merge_dags(self, pipeline: "Pipeline") -> None:
@@ -228,6 +228,7 @@ class Pipeline(DAG, LoggingMixin):
         if self.is_empty():
             self.compose()
 
+        self.queue = QueueFactory.factory(self.type)
         # Begin Enqueuing all Tasks in the DAG
         nodes = self.get_all_nodes()
         # Get Topological sort of Task Nodes by Id
@@ -242,7 +243,7 @@ class Pipeline(DAG, LoggingMixin):
     def run(self) -> Any:
         """Allows for Local Execution of a Pipeline Instance. Good for Debugging
         for advanced features and concurrency support use submit"""
-
+        self.result_queue = QueueFactory.factory(self.type)
         # If Queue is empty, populate it
         if self.queue.empty():
             self.collect()
@@ -250,11 +251,31 @@ class Pipeline(DAG, LoggingMixin):
         # Setup Default Executor
         executor = DefaultExecutor(
             task_queue=self.queue,
-            result_queue=QueueFactory.factory('default'))
+            result_queue=self.result_queue)
 
         # Start execution of Tasks
         self._log.info('Starting Execution')
         executor.start()
+        executor.end()
+        
+    def async_run(self, concurrency:int=1) -> Any:
+        """Allows for Local Execution of a Pipeline Instance. Good for Debugging
+        for advanced features and concurrency support use submit"""
+        self.result_queue = QueueFactory.factory(self.type)
+        # If Queue is empty, populate it
+        if self.queue.empty():
+            self.collect()
+
+        # Setup Default Executor
+        executor = AsyncIOExecutor(
+            concurrency=concurrency,
+            task_queue=self.queue,
+            result_queue=self.result_queue)
+
+        # Start execution of Tasks
+        self._log.info('Starting Execution')
+        executor.start()
+        executor.end()
 
     def submit(self) -> Any:
         """Submits DAG to the Scheduler"""

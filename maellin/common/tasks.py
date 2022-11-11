@@ -140,7 +140,7 @@ class Task(BaseTask):
             ''.join('{}={!r}, '.format(k, v) for k, v in self.__dict__.items())
         )
 
-    def update_status(self, status: Literal['Not Started', 'Queued', 'Running',
+    def update_status(self, status: Literal['Not Started', 'Queued', 'Running', 'Waiting'
                       'Completed', 'Failed'] = 'Not Started') -> None:
         """Updates the Status of a Task during Execution"""
         self.status = status
