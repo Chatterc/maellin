@@ -14,11 +14,13 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import cloudpickle as cpickle
+import requests
+from requests.exceptions import HTTPError
 from maellin.common.logger import LoggingMixin
 from maellin.common.graphs import DAG
 from maellin.common.queues import QueueFactory
 from maellin.common.tasks import Task, create_task
-from maellin.common.executors.default import DefaultExecutor, AsyncIOExecutor
+from maellin.common.executors.default import DefaultExecutor
 from maellin.common.exceptions import DependencyError, NotFoundError
 from typing import Any, List, Literal, Tuple
 
@@ -132,7 +134,7 @@ class Pipeline(DAG, LoggingMixin):
         else:
             raise TypeError("Invalid Dependencies found in {self.__name__}: Task {task.__name__} ")
 
-    def save(self, filename: str, protocol: str = None):
+    def dump(self, filename: str, protocol: str = None):
         """Serializes a DAG using cloudpickle
 
         Args:
@@ -152,6 +154,13 @@ class Pipeline(DAG, LoggingMixin):
             cpickle.register_pickle_by_value(module=maellin)
             cpickle.dump(obj=self.dag, file=f, protocol=protocol)
         return self
+    
+    def dumps(self, filename: str, protocol: str = None):
+        """Serializes a DAG using cloudpickle"""
+        import maellin
+        cpickle.register_pickle_by_value(module=maellin)
+        pkl_dag = cpickle.dumps(obj=self.dag, protocol=protocol)
+        return pkl_dag
 
     def load(self, filename: str):
         """loads a DAG to a pipeline instance
@@ -168,6 +177,24 @@ class Pipeline(DAG, LoggingMixin):
 
         with open(filename, 'rb') as f:
             dag = cpickle.load(f)
+            self.dag = dag
+        return self
+    
+    def loads(self, filename: str):
+        """loads a DAG to a pipeline instance
+
+        Args:
+            filename (str): filename of the pickled DAG
+
+        Usage:
+        >>> filename = 'my_dag.pkl' # filename to pickled dag file
+        >>> new_pipe = Pipeline() # create new pipeline instance
+        >>> new_pipe.load(filename) # load the dag to the pipeline instance
+        >>> new_pipe.run() # run the pipeline
+        """
+
+        with open(filename, 'rb') as f:
+            dag = cpickle.loads(f)
             self.dag = dag
         return self
 
@@ -273,25 +300,35 @@ class Pipeline(DAG, LoggingMixin):
         executor.start()
         executor.end()
         
-    def async_run(self, concurrency:int=1) -> Any:
-        """Allows for Local Execution of a Pipeline Instance. Good for Debugging
-        for advanced features and concurrency support use submit"""
-        self.result_queue = QueueFactory.factory(self.type)
-        # If Queue is empty, populate it
-        if self.queue.empty():
-            self.collect()
-
-        # Setup Default Executor
-        executor = AsyncIOExecutor(
-            concurrency=concurrency,
-            task_queue=self.queue,
-            result_queue=self.result_queue)
-
-        # Start execution of Tasks
-        self._log.info('Starting Execution')
-        executor.start()
-        executor.end()
-
-    def submit(self) -> Any:
+    def submit(
+        self,
+        name:str,
+        url = 'localhost/register',
+        trigger='interval',
+        minutes=5,
+        max_instances=1,
+        executor='default',
+        jobstore='default',
+        replace_existing=True) -> str:
         """Submits DAG to the Scheduler"""
-        ...
+        headers = {'content-type':'application/json'}
+        data = {
+            'name': name,
+            'trigger': trigger,
+            'minutes': minutes,
+            'max_instances': max_instances,
+            'executor': executor,
+            'jobstore': jobstore,
+            'replace_existing': replace_existing,
+            'dag': self.dumps(self.dag)
+        }
+        try:
+            resp = requests.post(url, json=data, headers=headers)
+            resp.raise_for_status()
+        except HTTPError as error:
+            raise error
+            
+        
+        
+
+    

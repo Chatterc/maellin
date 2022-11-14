@@ -30,10 +30,11 @@ from networkx import (
 
 class DAG:
 
-    def __init__(self) -> None:
+    def __init__(self, **attrs) -> None:
         """Base Directed Acyclic Graph Class with parallel edge support
         """
         self.dag = MultiDiGraph()
+        self.attrs = attrs
 
     def _validate_dag(self) -> None:
         """Validates Pipeline is constructed properly
