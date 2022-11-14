@@ -26,6 +26,9 @@ dependencies = [
     "networkx==2.8.*"
 ]
 
+[project.scripts]
+maellin = "cli:main"
+
 [project.urls]
 "Homepage" = "https://github.com/Chatterc/maellin"
 "Bug Tracker" = "https://github.com/Chatterc/maellin/issues"
