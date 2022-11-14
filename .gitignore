@@ -134,3 +134,4 @@ dmypy.json
 .config/.postgres
 maellin/common/plotting.py
 dssa_final_project.py
+.dags/
