@@ -24,7 +24,6 @@ import sys
 from typing import Sequence
 import platform
 
-from maellin.app.main import app
 from maellin import __version__
 
 
@@ -44,18 +43,18 @@ def main(argv: Sequence[str] | None = None) -> int:
         | |\/| |  / _` |  / _ \ | | | | | | | '_ \      | |  / _ \ 
         | |  | | | (_| | |  __/ | | | | | | | | | |  _  | | | (_) |
         |_|  |_|  \__,_|  \___| |_| |_| |_| |_| |_| (_) |_|  \___/ 
+        
         The easiest way to author data workflows with minimal setup!                                                       
-        verison %s""" % __version__)
-    
-    print("Using Python version %s (%s, %s)" % (
+        
+        Maellin.io verison %s
+        Using Python version %s (%s, %s)""" % (
+        __version__,    
         platform.python_version(),
         platform.python_build()[0],
-        platform.python_build()[1]
-        )
-    )
+        platform.python_build()[1]))
         
     if argv is None:
         argv = sys.argv[1:]
 
     #app.run(argv)
-    return app.exit_code()
+    return #app.exit_code()
