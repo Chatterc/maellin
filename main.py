@@ -1,7 +1,7 @@
 import os
 import time
 from maellin.common.workflows import Pipeline
-from maellin.common.scheduler import DefaultScheduler
+from maellin.scheduler import DefaultScheduler
 
 NAME = 'myfinalproject'
 sched = DefaultScheduler()

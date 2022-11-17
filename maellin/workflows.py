@@ -14,7 +14,7 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import cloudpickle as cpickle
-from maellin.common.scheduler import DefaultScheduler
+from maellin.scheduler import DefaultScheduler
 from maellin.common.logger import LoggingMixin
 from maellin.common.graphs import DAG
 from maellin.common.queues import QueueFactory
