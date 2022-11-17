@@ -14,8 +14,7 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import cloudpickle as cpickle
-import requests
-from requests.exceptions import HTTPError
+from maellin.common.scheduler import DefaultScheduler
 from maellin.common.logger import LoggingMixin
 from maellin.common.graphs import DAG
 from maellin.common.queues import QueueFactory
@@ -39,9 +38,11 @@ class Pipeline(DAG, LoggingMixin):
         Pipeline.pipeline_id += 1
         super().__init__()
         self.pid = Pipeline.pipeline_id
-        self.steps = [create_task(step) for step in steps]
+        self.steps = [step if isinstance(step, Pipeline) else create_task(step) for step in steps]
         self.type = type
         self._log = self.logger
+        self.queue = QueueFactory.factory(type=type)
+        self.sched = DefaultScheduler()
 
     def _merge_dags(self, pipeline: "Pipeline") -> None:
         """Allow a Pipeline object to receive an other Pipeline object \
@@ -106,7 +107,7 @@ class Pipeline(DAG, LoggingMixin):
 
         # Validate task is compatible with the dependency
         if not task.skip_validation:
-            task.task.validate(dep)
+            task.validate(dep)
 
         # Lookup dependent task from the current pipeline
         pipe = self
@@ -115,7 +116,7 @@ class Pipeline(DAG, LoggingMixin):
         if pipe.dag.nodes[dep.tid].get('tasks', None) is not None:
             for k in pipe.dag.nodes[dep.tid]['tasks'].keys():
                 for tsk in pipe.steps:
-                    if k == tsk.id:
+                    if k == tsk.tid:
                         task.related.append(k)
         else:
             raise DependencyError(f'{dep} was not found in {self.__name__}, check pipeline steps.')
@@ -155,11 +156,11 @@ class Pipeline(DAG, LoggingMixin):
             cpickle.dump(obj=self.dag, file=f, protocol=protocol)
         return self
     
-    def dumps(self, filename: str, protocol: str = None):
+    def dumps(self, protocol: str = None):
         """Serializes a DAG using cloudpickle"""
         import maellin
         cpickle.register_pickle_by_value(module=maellin)
-        pkl_dag = cpickle.dumps(obj=self.dag, protocol=protocol)
+        pkl_dag = str(cpickle.dumps(obj=self.dag, protocol=protocol)).encode('utf-8')
         return pkl_dag
 
     def load(self, filename: str):
@@ -242,9 +243,9 @@ class Pipeline(DAG, LoggingMixin):
             if task.depends_on is not None:
                 # Sanity check what was provided as a dependency
                 assert isinstance(task.depends_on, List), TypeError(
-                    f'Dependencies for Task: {Task.tid} must be a list.')
+                    f'Dependencies for Task: {task.name} must be a list.')
                 assert len(task.depends_on) >= 1, ValueError(
-                    f"No Dependencies Provided for Task: {Task.tid}")
+                    f"No Dependencies Provided for Task: {task.name}")
 
                 for idx, dep_task in enumerate(task.depends_on):
                     assert task != dep_task, DependencyError(f'{task} cannot be \
@@ -295,6 +296,7 @@ class Pipeline(DAG, LoggingMixin):
             task_queue=self.queue,
             result_queue=self.result_queue)
 
+
         # Start execution of Tasks
         self._log.info('Starting Execution')
         executor.start()
@@ -303,32 +305,25 @@ class Pipeline(DAG, LoggingMixin):
     def submit(
         self,
         name:str,
-        url = 'localhost/register',
         trigger='interval',
-        minutes=5,
+        minutes=1,
         max_instances=1,
-        executor='default',
-        jobstore='default',
         replace_existing=True) -> str:
         """Submits DAG to the Scheduler"""
-        headers = {'content-type':'application/json'}
-        data = {
-            'name': name,
-            'trigger': trigger,
-            'minutes': minutes,
-            'max_instances': max_instances,
-            'executor': executor,
-            'jobstore': jobstore,
-            'replace_existing': replace_existing,
-            'dag': self.dumps(self.dag)
-        }
-        try:
-            resp = requests.post(url, json=data, headers=headers)
-            resp.raise_for_status()
-        except HTTPError as error:
-            raise error
-            
         
+        if self.sched.state == 0:
+            self.sched.start()
+       
+        self.sched.add_job(
+            func=self.run,
+            name=name,
+            trigger=trigger, 
+            replace_existing=replace_existing,
+            max_instances=max_instances,
+            minutes=minutes)
+        
+        
+
         
 
     

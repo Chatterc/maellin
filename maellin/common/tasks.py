@@ -19,10 +19,13 @@ from maellin.common.logger import LoggingMixin
 from maellin.common.exceptions import CompatibilityException, MissingTypeHintException
 from maellin.common.utils import generate_uuid
 
+
 from typing import Any, Callable, TypeVar, List, Union, Dict, Tuple, Literal
 
 
 Task = TypeVar('Task')
+Pipeline = TypeVar('Pipeline')
+
 
 
 class AbstractBaseTask(metaclass=ABCMeta):
@@ -129,9 +132,9 @@ class Task(BaseTask):
             func: Callable,
             kwargs: Dict = {},
             depends_on: List = None,
-            skip_validation: bool = False,
             name: str = None,
-            desc: str = None) -> None:
+            desc: str = None,
+            skip_validation: bool = False) -> None:
 
         super().__init__(func=func)
         self.kwargs = kwargs
@@ -164,8 +167,10 @@ class Task(BaseTask):
         self.result = self._run(*inputs, **self.kwargs)
 
 
-def create_task(inputs: Union[Task, Tuple]):
+def create_task(inputs: Task | Tuple):
     if isinstance(inputs, Task):
         return inputs
-    task = Task(*inputs)
-    return task
+    elif isinstance(inputs, tuple):
+        return Task(*inputs)
+    else:
+        raise TypeError('Step must be a Task, Pipeline or Tuple')

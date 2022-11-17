@@ -34,7 +34,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     Args:
     argv (Sequence[str]): The arguments to be passed to the application for parsing.
         Defaults to None.
-    """
+    """        
     print(
         r"""
         Welcome to
@@ -53,6 +53,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         platform.python_build()[0],
         platform.python_build()[1]))
         
+
     if argv is None:
         argv = sys.argv[1:]
 
