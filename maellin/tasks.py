@@ -17,7 +17,7 @@ from abc import ABCMeta, abstractclassmethod
 from inspect import signature
 from maellin.logger import LoggingMixin
 from maellin.exceptions import CompatibilityException, MissingTypeHintException
-from maellin.utils.utils import generate_uuid
+from maellin.utils import generate_uuid
 
 
 from typing import Any, Callable, TypeVar, List, Union, Dict, Tuple, Literal
