@@ -14,8 +14,8 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from abc import abstractclassmethod, ABCMeta
-from maellin.common.utils import generate_uuid
-from maellin.common.logger import LoggingMixin
+from maellin.utils import generate_uuid
+from maellin.logger import LoggingMixin
 from typing import TypeVar
 
 Queue = TypeVar('Queue')

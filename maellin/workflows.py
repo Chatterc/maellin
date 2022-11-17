@@ -15,12 +15,12 @@
 
 import cloudpickle as cpickle
 from maellin.scheduler import DefaultScheduler
-from maellin.common.logger import LoggingMixin
-from maellin.common.graphs import DAG
-from maellin.common.queues import QueueFactory
-from maellin.common.tasks import Task, create_task
-from maellin.common.executors.default import DefaultExecutor
-from maellin.common.exceptions import DependencyError, NotFoundError
+from maellin.logger import LoggingMixin
+from maellin.graphs import DAG
+from maellin.queues import QueueFactory
+from maellin.tasks import Task, create_task
+from maellin.executors.default import DefaultExecutor
+from maellin.exceptions import DependencyError, NotFoundError
 from typing import Any, List, Literal, Tuple
 
 

@@ -16,7 +16,7 @@
 from psycopg import connect, Connection
 from psycopg.conninfo import make_conninfo
 from configparser import ConfigParser
-from maellin.common.clients.base import AbstractBaseClient
+from maellin.clients.base import AbstractBaseClient
 
 
 class PostgresClient(AbstractBaseClient):

@@ -12,9 +12,9 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from maellin.common.executors.base import BaseExecutor
-from maellin.common.utils import get_task_result
-from maellin.common.logger import LoggingMixin
+from maellin.executors.base import BaseExecutor
+from maellin.utils import get_task_result
+from maellin.logger import LoggingMixin
 from typing import TypeVar
 
 

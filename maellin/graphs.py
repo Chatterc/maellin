@@ -15,8 +15,8 @@
 
 from typing import Dict, List, Type
 from uuid import uuid4
-from maellin.common.exceptions import CircularDependencyError, MissingDependencyError
-from maellin.common.tasks import Task
+from maellin.exceptions import CircularDependencyError, MissingDependencyError
+from maellin.tasks import Task
 from networkx import (
     MultiDiGraph,
     compose,
