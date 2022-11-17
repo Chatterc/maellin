@@ -1,4 +1,4 @@
-# ![img](maellin/app/assets/img/logos/logo_01.png)
+# ![img](static/img/logos/logo_01.png)
 
 ---
 
