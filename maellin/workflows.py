@@ -25,8 +25,7 @@ from typing import Any, List, Literal, Tuple
 
 
 class Pipeline(DAG, LoggingMixin):
-    """A Directed Acyclic MultiGraph based Pipeline for Data Processing.
-    """
+    """A Directed Acyclic MultiGraph based Pipeline for Data Processing. """
 
     pipeline_id = 0
 
@@ -90,9 +89,9 @@ class Pipeline(DAG, LoggingMixin):
         # Validate task is compatible with the dependency
         if not task.skip_validation:
             task.validate(dep_task)
-            self._log.info('Validation Check Complete for %s :: %s' % (task.func.__name__, task.name))
+            self._log.info('Validation Check Complete for %s & %s' % (task.name, dep_task.name))
 
-        # Lookup dependent task from the current pipeline or the calling pipeline
+        # Lookup dependent task from the current pipeline or the called pipeline
         if dag.nodes[dep_task.tid].get('tasks', None) is not None:
             for k in dag.nodes[dep_task.tid]['tasks'].keys():
                 task.related.append(k)
@@ -102,8 +101,7 @@ class Pipeline(DAG, LoggingMixin):
         return (task, dep_task)
 
     def _proc_task_dep(self, task, dep, input_pipe):
-        """Processes Dependencies that contain a subclass of a Task.
-        """
+        """Processes Dependencies that contain a subclass of a Task."""
 
         # Validate task is compatible with the dependency
         if not task.skip_validation:
@@ -147,7 +145,7 @@ class Pipeline(DAG, LoggingMixin):
         >>> filename = 'my_dag.pkl' # filename to use to serialize DAG
         >>> pipe = Pipeline(steps=my_steps) # create new pipeline instance with steps
         >>> pipe.compose() # compose a DAG from steps
-        >>> pipe.save(filename) # save the DAG
+        >>> pipe.dump(filename) # save the DAG
         """
 
         with open(filename, 'wb') as f:
@@ -321,9 +319,4 @@ class Pipeline(DAG, LoggingMixin):
             replace_existing=replace_existing,
             max_instances=max_instances,
             minutes=minutes)
-        
-        
-
-        
-
     

@@ -1,12 +1,11 @@
 import os
 import time
-from maellin.common.workflows import Pipeline
+from maellin.workflows import Pipeline
 from maellin.scheduler import DefaultScheduler
 
-NAME = 'myfinalproject'
 sched = DefaultScheduler()
 sched.start()
-
+    
 def create_jobs(path_to_dags:str):
     """Adds All Stored DAGs to The Scheduler"""
     
@@ -34,11 +33,14 @@ def create_jobs(path_to_dags:str):
 
       
 def main():
+
+    
     # Poll Scheduler for scheduled dag runs
     while True:
         create_jobs('.dags')
         sched.print_jobs()
         time.sleep(5)
-        
+
+
 if __name__ == '__main__':
     main()
