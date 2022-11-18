@@ -48,6 +48,3 @@ def get_task_result(task) -> Tuple[Any]:
         if data is not None:
             inputs.append(data)
     return tuple(inputs)
-
-
-

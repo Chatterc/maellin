@@ -78,4 +78,3 @@ class DefaultExecutor(BaseExecutor):
     def end(self):
         """Removes the worker and results"""
         del self.worker
-
