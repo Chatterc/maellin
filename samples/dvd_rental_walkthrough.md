@@ -127,7 +127,8 @@ __Dimension Table: FILM__
 My project consist of two main features:
 1. __Authoring__ - The ability to compose a DAG based workflow that is debugger friendly and strongly typed. 
 <br>
-2. __Scheduling & Execution__ - The ability to schedule authored DAGs as batch processing jobs.
+
+2. __Scheduling and Execution__ - The ability to schedule authored DAGs as batch processing jobs.
 
 ## How Did I Develop My Python Modules?
 
