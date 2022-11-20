@@ -132,7 +132,5 @@ dmypy.json
 # configs
 .config\.postgres
 .config/.postgres
-maellin/common/plotting.py
-dssa_final_project.py
 .dags/
 .DS_Store
