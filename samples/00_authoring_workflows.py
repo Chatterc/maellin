@@ -15,6 +15,7 @@ from maellin.clients.postgres import PostgresClient
 from maellin.plotting import plot_dag
 
 # ============================ PARAMETERS ============================ #
+# This section contains some script parameters
 DATABASE_CONFIG = '.config\.postgres'
 SECTION = 'postgresql'
 DW = Schema('dw')
@@ -22,6 +23,12 @@ DVD = Schema('public')
 
 
 # ============================ TABLE DEFINITIONS ============================ #
+# This section is for providing table definitions for any DB objects that need
+# to be created in the pipeline. We currently use Pypika for using a builder 
+# pattern for constructing sql queries in python but another framework like 
+# SQLAlchemy can also be used.
+
+# The Fact Table of our star schema
 FACT_RENTAL = (
     Column('sk_customer', 'INT', False),
     Column('sk_date', 'INT', False),
@@ -31,21 +38,21 @@ FACT_RENTAL = (
     Column('count_rentals', 'INT', False)
 )
 
-
+# A dimension Table for customers
 DIM_CUSTOMER = (
     Column('sk_customer', 'INT', False),
     Column('name', 'VARCHAR(100)', False),
     Column('email', 'VARCHAR(100)', False)
 )
 
-
+# A dimension Table for staff
 DIM_STAFF = (
     Column('sk_staff', 'INT', False),
     Column('name', 'VARCHAR(100)', False),
     Column('email', 'VARCHAR(100)', False)
 )
 
-
+# A dimension table for films
 DIM_FILM = (
     Column('sk_film', 'INT', False),
     Column('rating_code', 'VARCHAR(20)', False),
@@ -56,7 +63,7 @@ DIM_FILM = (
     Column('title', 'VARCHAR(255)', False)
 )
 
-
+# A dimension table for dates
 DIM_DATE = (
     Column('sk_date', 'INT', False),
     Column('date', 'TIMESTAMP', False),
@@ -66,7 +73,7 @@ DIM_DATE = (
     Column('day', 'INT', False),
 )
 
-
+# A dimension table for stores
 DIM_STORE = (
     Column('sk_store', 'INT', False),
     Column('name', 'VARCHAR(100)', False),
@@ -80,6 +87,16 @@ DIM_STORE = (
 # ============================ FUNCTIONS ============================ #
 # This section contains all the ETL code that needs to be executed to build a star schema
 def create_cursor(path:str, section:str) -> Cursor:
+    """Creates a Database Cursor for sending commands
+    and queries to the connection instance
+
+    Args:
+        path (str): path to an ini file containing database params
+        section (str): section name in the ini file containing pararms
+
+    Returns:
+        Cursor: A Cursor instance
+    """
     client = PostgresClient()
     conn = client.connect_from_config(path, section, autocommit=True)
     cursor = conn.cursor()
@@ -87,6 +104,16 @@ def create_cursor(path:str, section:str) -> Cursor:
     
 
 def create_schema(cursor:Cursor, schema_name:str) -> Cursor:
+    """Creates a new schema in a database using a cursor
+
+    Args:
+        cursor (Cursor): a cursor instance
+        schema_name (str): name of the schema to create
+
+    Returns:
+        Cursor: Cursor for sending commands\
+            and queries to the connection instance
+    """
     q = f"CREATE SCHEMA IF NOT EXISTS {schema_name};"
     cursor.execute(q)
     return cursor
@@ -99,6 +126,16 @@ def create_table(
     primary_key:str=None, 
     foreign_keys:list=None,
     reference_tables:list=None) -> None:
+    """Creates a new table in  database using a cursor
+
+    Args:
+        cursor (Cursor): cursor instance
+        table_name (str): name of the table to create
+        definition (tuple): definition of the table to create
+        primary_key (str, optional): Primary Key of the Table. Defaults to None.
+        foreign_keys (list, optional): Foreign Keys of the Table. Defaults to None.
+        reference_tables (list, optional): Reference Table for foreign keys. Defaults to None.
+    """
     
     ddl = PostgreSQLQuery \
         .create_table(table_name) \
@@ -123,6 +160,16 @@ def create_table(
 
 
 def read_table(cursor:Cursor, table_name:str, columns:tuple) -> pd.DataFrame:
+    """Executes a query to selects Columns and rows from a Table using a cursor 
+
+    Args:
+        cursor (Cursor): A cursor instance
+        table_name (str): name of the table to query
+        columns (tuple): name of columns from the table to select
+
+    Returns:
+        pd.DataFrame: Returns results in a pandas dataframe
+    """
     query = PostgreSQLQuery \
         .from_(table_name) \
         .select(*columns) \
@@ -137,6 +184,15 @@ def read_table(cursor:Cursor, table_name:str, columns:tuple) -> pd.DataFrame:
 
 
 def build_dim_customer(cust_df:pd.DataFrame) -> pd.DataFrame:
+    """constructs the customer dimension object
+
+    Args:
+        cust_df (pd.DataFrame): dataframe from the raw customer table \
+            that is usually the result of read_table
+
+    Returns:
+        pd.DataFrame: customer dimension object as a pandas dataframe
+    """
     cust_df.rename(columns={'customer_id': 'sk_customer'}, inplace=True)
     cust_df['name'] = cust_df.first_name + " " + cust_df.last_name
     dim_customer = cust_df[['sk_customer', 'name', 'email']].copy()
@@ -145,6 +201,15 @@ def build_dim_customer(cust_df:pd.DataFrame) -> pd.DataFrame:
     
 
 def build_dim_staff(staff_df:pd.DataFrame) -> pd.DataFrame:
+    """constructs the staff dimension object
+
+    Args:
+        staff_df (pd.DataFrame): dataframe from the raw staff table \
+            that is usually the result of read_table
+
+    Returns:
+        pd.DataFrame: staff dimension object as a pandas dataframe
+    """
     staff_df.rename(columns={'staff_id': 'sk_staff'}, inplace=True)
     staff_df['name'] = staff_df.first_name + " " + staff_df.last_name
     dim_staff = staff_df[['sk_staff', 'name', 'email']].copy()
@@ -153,6 +218,16 @@ def build_dim_staff(staff_df:pd.DataFrame) -> pd.DataFrame:
     
 
 def build_dim_dates(dates_df:pd.DataFrame) -> pd.DataFrame:
+    """constructs the dates dimension table
+
+    Args:
+        dates_df (pd.DataFrame): dataframe from the raw rental table \
+            that is usually the result of read_table. The DVD rental \
+            database does not have dates table so one is derived.
+
+    Returns:
+        pd.DataFrame: date dimension object as a pandas dataframe
+    """
     dates_df = dates_df.copy()
     dates_df['sk_date'] = dates_df.rental_date.dt.strftime("%Y%m%d").astype('int')
     dates_df['date'] = dates_df.rental_date.dt.date
@@ -171,6 +246,18 @@ def build_dim_store(
     address_df:pd.DataFrame,
     city_df:pd.DataFrame,
     country_df:pd.DataFrame) -> pd.DataFrame:
+    """constructs the store dimension table
+
+    Args:
+        store_df (pd.DataFrame): dataframe from the raw store table
+        staff_df (pd.DataFrame): dataframe from the raw staff table
+        address_df (pd.DataFrame): dataframe from the raw address table
+        city_df (pd.DataFrame): dataframe from the raw city table
+        country_df (pd.DataFrame): dataframe from the raw country table
+
+    Returns:
+        pd.DataFrame: store dimension object as a pandas dataframe
+    """
     
     staff_df.rename(columns={'manager_staff_id':'staff_id'}, inplace=True)
     staff_df['name'] = staff_df.first_name + " " + staff_df.last_name
@@ -193,6 +280,15 @@ def build_dim_store(
 
 
 def build_dim_film(film_df:pd.DataFrame, lang_df:pd.DataFrame) -> pd.DataFrame:
+    """constructs the film dimension table
+
+    Args:
+        film_df (pd.DataFrame): dataframe from the raw film table
+        lang_df (pd.DataFrame): dataframe from the raw language table
+
+    Returns:
+        pd.DataFrame: film dimension object as a pandas dataframe
+    """
     
     film_df.rename(
         columns={'film_id': 'sk_film', 'rating':'rating_code', 'length':'film_duration'},
@@ -216,6 +312,19 @@ def build_fact_rental(
     film_df:pd.DataFrame,
     staff_df:pd.DataFrame,
     store_df:pd.DataFrame) -> pd.DataFrame:
+    """_summary_
+
+    Args:
+        rental_df (pd.DataFrame): _description_
+        inventory_df (pd.DataFrame): _description_
+        date_df (pd.DataFrame): _description_
+        film_df (pd.DataFrame): _description_
+        staff_df (pd.DataFrame): _description_
+        store_df (pd.DataFrame): _description_
+
+    Returns:
+        pd.DataFrame: _description_
+    """
     
     rental_df.rename(columns={'customer_id':'sk_customer', 'rental_date':'date'}, inplace=True)
     rental_df['date'] = rental_df.date.dt.date
@@ -234,6 +343,13 @@ def build_fact_rental(
 
 
 def sink_data(cursor: Cursor, df:pd.DataFrame, target:str):
+    """Writes data to a table from a pandas dataframe
+
+    Args:
+        cursor (Cursor): A cusror instance
+        df (pd.DataFrame): pandas dataframe containing data to write 
+        target (str): name of table for "INSERT" query
+    """
     data = tuple(df.itertuples(index=False, name=None))
     query = PostgreSQLQuery \
         .into(target) \
@@ -244,15 +360,24 @@ def sink_data(cursor: Cursor, df:pd.DataFrame, target:str):
 
 
 def tear_down(cursor: Cursor) -> None:
-    #cursor.execute("DROP SCHEMA DSSA CASCADE;")
+    """Closes the connection to the Database
+
+    Args:
+        cursor (Cursor): Cursor instance
+    """
+    # Uncomment below to remove everyting created from this pipeline
+    #cursor.execute("DROP SCHEMA DW CASCADE;")
     cursor.close()
     return
 
 
 def main():
     # ============================ AUTHOR WORKFLOWS ============================ #
-    # This section uses the python modules to author a DAG based workflow
-    # Note that merging multiple pipelines is natively supported. 
+    # This section uses maellin's Pipeline class to author a DAG based workflow
+    # from the functions defined above. Note that merging multiple pipelines
+    # is natively supported. 
+    
+    # Creates a DAG for all the DDL commands to execute to create schema and tables
     setup_workflow = Pipeline(
         steps=[
             Task(create_cursor, 
@@ -294,7 +419,7 @@ def main():
         type='default'
     )
     
-
+    # Creates a DAG for extract, transform, and load to dim Customer
     cust_workflow = Pipeline(
         steps=[
             Task(read_table,
@@ -315,7 +440,7 @@ def main():
             ]
         )
     
-    
+    # Creates a DAG for extract, transform, and load to dim Staff
     staff_workflow = Pipeline(
         steps=[
             Task(read_table,
@@ -336,7 +461,7 @@ def main():
             ]
         )
     
-    
+    # Creates a DAG for extract, transform, and load to dim Dates
     dates_workflow = Pipeline(
         steps=[
             Task(read_table,
@@ -357,7 +482,7 @@ def main():
             ]
         )
 
-    
+    # Creates a DAG for extract, transform, and load to dim Store
     store_workflow = Pipeline(
         steps=[
             Task(read_table,
@@ -393,7 +518,7 @@ def main():
             ]
         )
     
-    
+    # Creates a DAG for extract, transform, and load to dim Film
     film_workflow = Pipeline(
         steps=[
             Task(read_table,
@@ -420,7 +545,7 @@ def main():
         ]
     )
     
-    
+    # Creates a DAG for extract, transform, and load to Fact Rental
     fact_workflow = Pipeline(
         steps=[
             Task(read_table,
@@ -441,7 +566,7 @@ def main():
         ]
     )
     
-    
+    # Creates a DAG for tear down tasks and closing out any open connections to the database
     teardown_workflow = Pipeline(
         steps =[
             Task(tear_down,
@@ -459,7 +584,8 @@ def main():
         )
 
 
-    etl_workflow = Pipeline(
+    # We merge all the above Pipelines into a single Pipeline containing all Tasks to be added to the DAG.
+    workflow = Pipeline(
         steps=[
             setup_workflow,
             cust_workflow,
@@ -475,24 +601,28 @@ def main():
 
     # ============================ COMPILATION ============================ #
     # This section composes the DAG from the provided Tasks 
-    etl_workflow.compose()
+    workflow.compose()
+    # Optionally we can plot the DAG (this module needs work bewarned)
     #plot_dag(etl_workflow.dag, savefig=False, path='dag.png')
     
-    etl_workflow.dump(filename='.dags/dvd_rental_workflow.pkl')
+    # Save the DAG so that it can be scheduled
+    workflow.dump(filename='.dags/dvd_rental_workflow.pkl')
 
 
 
     # ============================ ENQUEUE ============================ #
-    # Puts each task in a queue sorted in topological order
-    etl_workflow.collect()
+    # This section uses the .collect() method which enqueues all tasks in the DAG
+    # to a task FIFO queue in topological order 
+    workflow.collect()
 
 
     # ============================ EXECUTION ============================ #
-    # To run a Maellin Workflow locally using a single worker
+    # Runs a Maellin Workflow locally using a single worker
     # This option is good for debugging before presisting the workflow 
     # and submitting it to the scheduler.
-    etl_workflow.run()
+    workflow.run()
 
 
 if __name__ == '__main__':
+    # this part is needed to execute the program
     main()
