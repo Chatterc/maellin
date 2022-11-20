@@ -3,8 +3,8 @@
 # This package does not install PostgreSQL but offers an API for   # 
 # working with PostgreSQL and executing SQL Queries. We do not     #
 # make any depedencies to use a particular ORM at this time.       #
-# This example demonstrats how a user's python code can be         #
-# compiled into DAG containing Tasks to execute.                   #
+# This example demonstrates how a user's python code can be        #
+# compiled into DAG of Tasks to execute.                           #
 
 import pandas as pd
 from psycopg import Cursor
@@ -17,7 +17,7 @@ from maellin.plotting import plot_dag
 # ============================ PARAMETERS ============================ #
 DATABASE_CONFIG = '.config\.postgres'
 SECTION = 'postgresql'
-DW = Schema('dssa')
+DW = Schema('dw')
 DVD = Schema('public')
 
 
@@ -252,6 +252,7 @@ def tear_down(cursor: Cursor) -> None:
 def main():
     # ============================ AUTHOR WORKFLOWS ============================ #
     # This section uses the python modules to author a DAG based workflow
+    # Note that merging multiple pipelines is natively supported. 
     setup_workflow = Pipeline(
         steps=[
             Task(create_cursor, 
@@ -483,14 +484,14 @@ def main():
 
     # ============================ ENQUEUE ============================ #
     # Puts each task in a queue sorted in topological order
-    #etl_workflow.collect()
+    etl_workflow.collect()
 
 
     # ============================ EXECUTION ============================ #
     # To run a Maellin Workflow locally using a single worker
     # This option is good for debugging before presisting the workflow 
     # and submitting it to the scheduler.
-    # etl_workflow.run()
+    etl_workflow.run()
 
 
 if __name__ == '__main__':

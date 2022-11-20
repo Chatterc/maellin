@@ -31,7 +31,53 @@ This project structure should be used to help contributors understand where to "
 ## __Getting Started__
 
 ### __Basic Usage__
+Maellin.io has two primary user flows 
+1. Authoring 
+2. Scheduling
+
+__Authoring__ provides a debugging friendly experience for users to compose a DAG of Tasks. The primary entry point for authoring a DAG is the `Pipeline` class using the `steps` argument
+
+The following example highlights how to author a pipeline with a single task using the Maellin PostgresClient to return a cursor object
+```python
+from maellin.workflows import Pipeline
+from maellin.tasks import Task
+from maellin.clients.postgres import PostgresClient
+
+
+DATABASE_CONFIG = '.config\.postgres'
+SECTION = 'postgresql'
+
+
+# A user-defined python function that uses the Maellin PostgresClient to create a cursor object
+def create_cursor(path:str, section:str) -> Cursor:
+    client = PostgresClient()
+    conn = client.connect_from_config(path, section, autocommit=True)
+    cursor = conn.cursor()
+    return cursor
+
+# The Pipeline class is the entry point for adding Tasks into the DAG. Any keyword arguments required that you provided will bind to the callable when the is executed. 
+workflow = Pipeline(
+    steps=[
+        Task(
+            func=create_cursor, 
+            kwargs={'path': DATABASE_CONFIG, 'section': SECTION}, 
+            depends_on=None, 
+            name='create_cursor'
+        )
+    ]
+)
+
+# The built-in run() method will execute any tasks in the DAG Locally in a single worker for debugging purposes.
+workflow.run()
+```
+see a full [sample](/samples/00_authoring_workflows.py) of how to author workflows to create a star-schema here.
+
+
 #### Installation
+
+```bash
+pip install maellin
+```
 #### Using Tasks
 #### Using Workflows
 #### Choosing an Executor
@@ -39,7 +85,6 @@ This project structure should be used to help contributors understand where to "
 #### Using the Scheduler
 
 ### __Advanced Usage__
-#### Launching Maellin.io Web Server
 #### Using the Maellin.io CLI
 
 ---
