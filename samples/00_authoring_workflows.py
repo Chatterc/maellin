@@ -24,11 +24,11 @@ DVD = Schema('public')
 
 # ============================ TABLE DEFINITIONS ============================ #
 # This section is for providing table definitions for any DB objects that need
-# to be created in the pipeline. We currently use Pypika for using a builder 
-# pattern for constructing sql queries in python but another framework like 
+# to be created in the pipeline. We currently use Pypika, which implements a builder 
+# pattern for constructing sql queries in python but other frameworks like 
 # SQLAlchemy can also be used.
 
-# The Fact Table of our star schema
+# The fact Table of our star schema
 FACT_RENTAL = (
     Column('sk_customer', 'INT', False),
     Column('sk_date', 'INT', False),
