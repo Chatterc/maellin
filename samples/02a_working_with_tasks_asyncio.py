@@ -2,8 +2,9 @@ import time
 import asyncio
 import os
 
-from maellin.common.tasks import Task
-from maellin.common.queues import QueueFactory
+os.chdir("./../")
+from maellin.tasks import Task
+from maellin.queues import QueueFactory
 
 
 async def foo():
