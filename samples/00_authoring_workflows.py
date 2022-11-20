@@ -86,6 +86,9 @@ DIM_STORE = (
 
 # ============================ FUNCTIONS ============================ #
 # This section contains all the ETL code that needs to be executed to build a star schema
+# The are all python functions that use mostly pandas dataframes for constructing the
+# transformed data that will be loaded to the data warehouse.
+
 def create_cursor(path:str, section:str) -> Cursor:
     """Creates a Database Cursor for sending commands
     and queries to the connection instance
@@ -372,10 +375,14 @@ def tear_down(cursor: Cursor) -> None:
 
 
 def main():
-    # ============================ AUTHOR WORKFLOWS ============================ #
+    # ============================ AUTHORING WORKFLOWS ============================ #
     # This section uses maellin's Pipeline class to author a DAG based workflow
-    # from the functions defined above. Note that merging multiple pipelines
-    # is natively supported. 
+    # from the functions defined above. Note that merging multiple pipelines together
+    # is natively supported. When a Task with a dependency is created, the Pipeline calls
+    # the Task.validate() on the dependency to check for compatibility before it is added 
+    # to the DAG. Compatibility checks rely on type hints for all provided arguments
+    # and return statements. To skip validation simply set skip_validation=True when
+    # creating the Task. 
     
     # Creates a DAG for all the DDL commands to execute to create schema and tables
     setup_workflow = Pipeline(
