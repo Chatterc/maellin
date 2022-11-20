@@ -315,15 +315,15 @@ def build_fact_rental(
     """_summary_
 
     Args:
-        rental_df (pd.DataFrame): _description_
-        inventory_df (pd.DataFrame): _description_
-        date_df (pd.DataFrame): _description_
-        film_df (pd.DataFrame): _description_
-        staff_df (pd.DataFrame): _description_
-        store_df (pd.DataFrame): _description_
+        rental_df (pd.DataFrame): dataframe from the raw rental table
+        inventory_df (pd.DataFrame): dataframe from the raw inventory table
+        date_df (pd.DataFrame): dataframe containing dim table
+        film_df (pd.DataFrame): dataframe containing dim film
+        staff_df (pd.DataFrame): dataframe containing dim staff
+        store_df (pd.DataFrame): dataframe containing dim store
 
     Returns:
-        pd.DataFrame: _description_
+        pd.DataFrame: fact rental object as a pandas dataframe
     """
     
     rental_df.rename(columns={'customer_id':'sk_customer', 'rental_date':'date'}, inplace=True)
