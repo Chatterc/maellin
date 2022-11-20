@@ -153,7 +153,7 @@ class Pipeline(DAG, LoggingMixin):
             cpickle.register_pickle_by_value(module=maellin)
             cpickle.dump(obj=self.dag, file=f, protocol=protocol)
         return self
-    
+
     def dumps(self, protocol: str = None):
         """Serializes a DAG using cloudpickle"""
         import maellin
@@ -178,7 +178,7 @@ class Pipeline(DAG, LoggingMixin):
             dag = cpickle.load(f)
             self.dag = dag
         return self
-    
+
     def loads(self, filename: str):
         """loads a DAG to a pipeline instance
 
@@ -294,29 +294,27 @@ class Pipeline(DAG, LoggingMixin):
             task_queue=self.queue,
             result_queue=self.result_queue)
 
-
         # Start execution of Tasks
         self._log.info('Starting Execution')
         executor.start()
         executor.end()
-        
+
     def submit(
-        self,
-        name:str,
-        trigger='interval',
-        minutes=1,
-        max_instances=1,
-        replace_existing=True) -> str:
+            self,
+            name: str,
+            trigger='interval',
+            minutes=1,
+            max_instances=1,
+            replace_existing=True) -> str:
         """Submits DAG to the Scheduler"""
-        
+
         if self.sched.state == 0:
             self.sched.start()
-       
+
         self.sched.add_job(
             func=self.run,
             name=name,
-            trigger=trigger, 
+            trigger=trigger,
             replace_existing=replace_existing,
             max_instances=max_instances,
             minutes=minutes)
-    

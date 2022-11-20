@@ -27,7 +27,6 @@ Task = TypeVar('Task')
 Pipeline = TypeVar('Pipeline')
 
 
-
 class AbstractBaseTask(metaclass=ABCMeta):
     """Abstract Base Class of Task that cannot be instantiated and must be
     implemented by the BaseTask class
