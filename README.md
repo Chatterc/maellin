@@ -32,8 +32,8 @@ This project structure should be used to help contributors understand where to "
 
 ### __Basic Usage__
 Maellin.io has two primary user flows 
-1. Authoring 
-2. Scheduling
+1. Authoring - The process of composing a DAG from various tasks.
+2. Scheduling - Executes DAG pipelines based on a set schedule.
 
 __Authoring__ provides a debugging friendly experience for users to compose a DAG of Tasks. The primary entry point for authoring a DAG is the `Pipeline` class using the `steps` argument
 
@@ -48,14 +48,17 @@ DATABASE_CONFIG = '.config\.postgres'
 SECTION = 'postgresql'
 
 
-# A user-defined python function that uses the Maellin PostgresClient to create a cursor object
+# A user-defined python function that uses the Maellin PostgresClient
+# to create a cursor object
 def create_cursor(path:str, section:str) -> Cursor:
     client = PostgresClient()
     conn = client.connect_from_config(path, section, autocommit=True)
     cursor = conn.cursor()
     return cursor
 
-# The Pipeline class is the entry point for adding Tasks into the DAG. Any keyword arguments required that you provided will bind to the callable when the is executed. 
+# The Pipeline class is the entry point for adding Tasks into the DAG. 
+# Any keyword arguments required that you provided will bind to the 
+# callable when the is executed. 
 workflow = Pipeline(
     steps=[
         Task(
@@ -67,10 +70,11 @@ workflow = Pipeline(
     ]
 )
 
-# The built-in run() method will execute any tasks in the DAG Locally in a single worker for debugging purposes.
+# The built-in run() method will execute any tasks in the DAG Locally
+#  in a single worker for debugging purposes.
 workflow.run()
 ```
-see a full [sample](/samples/00_authoring_workflows.py) of how to author workflows to create a star-schema here.
+See the full authoring [sample](/samples/00_authoring_workflows.py) that uses Maellin to to create a star-schema here.
 
 
 #### Installation
