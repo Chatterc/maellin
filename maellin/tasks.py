@@ -14,17 +14,27 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from abc import ABCMeta, abstractclassmethod
+from functools import partial
 from inspect import signature
 from maellin.logger import LoggingMixin
 from maellin.exceptions import CompatibilityException, MissingTypeHintException
 from maellin.utils import generate_uuid
 
 
-from typing import Any, Callable, TypeVar, List, Union, Dict, Tuple, Literal
+from typing import Any, Callable, TypeVar, List, Tuple, Literal
 
 
 Task = TypeVar('Task')
 Pipeline = TypeVar('Pipeline')
+
+
+def create_task(inputs: Task | Tuple):
+    if isinstance(inputs, Task):
+        return inputs
+    elif isinstance(inputs, tuple):
+        return Task(*inputs)
+    else:
+        raise TypeError('Step must be a Task, Pipeline or Tuple')
 
 
 class AbstractBaseTask(metaclass=ABCMeta):
@@ -53,7 +63,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
         """Gets the type annotations for all arguments in a python callable
 
         Returns:
-            annotation_list: annotated list of acceptable types
+            annotation_list: returns annotated list of acceptable compatible input types
         """
         annotation_list = [x.annotation for x in signature(self.func).parameters.values()]
         return annotation_list
@@ -62,7 +72,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
         """Gets the return type annotation for a python callable
 
         Returns:
-            return_annotation : type annotation for the return statement of func
+            return_annotation : type annotation for the return statement of Callable
         """
         try:
             return_annotation = self.func.__annotations__['return']
@@ -120,7 +130,6 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
         try:
             return self.func(*args, **kwargs)
         except Exception as error:
-            self._log.exception(error, exc_info=True, stack_info=True)
             raise error
 
 
@@ -129,14 +138,13 @@ class Task(BaseTask):
     def __init__(
             self,
             func: Callable,
-            kwargs: Dict = {},
             depends_on: List = None,
             name: str = None,
             desc: str = None,
-            skip_validation: bool = False) -> None:
+            skip_validation: bool = False,
+            **kwargs) -> None:
 
-        super().__init__(func=func)
-        self.kwargs = kwargs
+        super().__init__(func=partial(func, **kwargs))
         self.depends_on = depends_on
         self.skip_validation = skip_validation
         self.name = name
@@ -162,14 +170,5 @@ class Task(BaseTask):
         """Updates the Status of a Task during Execution"""
         self.status = status
 
-    def run(self, inputs: tuple):
-        self.result = self._run(*inputs, **self.kwargs)
-
-
-def create_task(inputs: Task | Tuple):
-    if isinstance(inputs, Task):
-        return inputs
-    elif isinstance(inputs, tuple):
-        return Task(*inputs)
-    else:
-        raise TypeError('Step must be a Task, Pipeline or Tuple')
+    def run(self, *args, **kwargs):
+        self.result = self._run(*args, **kwargs)

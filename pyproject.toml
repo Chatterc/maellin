@@ -1,15 +1,15 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pywin32 >= "1.0; platform_system=='Windows'",
+psycopg = "3.1.*",
+pandas = "1.5.*",
+networkx = "2.8.*"
 
 [project]
-name = "maellin"
-version = "0.0.1"
-authors = [
-  { name="Carl Chatterton", email="Carl.Chatterton@maellin.io" },
-]
-description = "A small example package"
-readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3.10",
@@ -17,12 +17,6 @@ classifiers = [
     "Natural Language :: English",
     "Operating System :: OS Independent",
     "Framework :: Maellin",
-]
-dependencies = [
-    "pywin32 >= 1.0; platform_system=='Windows'",
-    "psycopg==3.1.*",
-    "pandas==1.5.*",
-    "networkx==2.8.*"
 ]
 
 [project.scripts]
@@ -37,3 +31,10 @@ maellin = "maellin.cli:main"
 # include = ["maellin*"]
 exclude = ["maellin.tests*"]
 # namespaces = false  # true by default
+
+[tool.poetry]
+name = "maellin"
+version = "0.0.2"
+description = "A small example package"
+authors = ["Carl Chatterton <Carl.Chatterton@maellin.io>"]
+readme = "README.md"
