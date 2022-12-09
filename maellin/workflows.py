@@ -13,15 +13,17 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import cloudpickle as cpickle
-from maellin.scheduler import DefaultScheduler
-from maellin.logger import LoggingMixin
-from maellin.graphs import DAG
-from maellin.queues import QueueFactory
-from maellin.tasks import Task, create_task
-from maellin.executors.default import DefaultExecutor
-from maellin.exceptions import DependencyError, NotFoundError
 from typing import Any, List, Literal, Tuple
+
+import cloudpickle as cpickle
+
+from maellin.exceptions import DependencyError, NotFoundError
+from maellin.executors.default import DefaultExecutor
+from maellin.graphs import DAG
+from maellin.logger import LoggingMixin
+from maellin.queues import QueueFactory
+from maellin.scheduler import DefaultScheduler
+from maellin.tasks import Task, create_task
 
 
 class Pipeline(DAG, LoggingMixin):

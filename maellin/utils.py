@@ -13,8 +13,8 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from uuid import uuid4, uuid5, NAMESPACE_OID
-from typing import Tuple, Any
+from typing import Any, Tuple
+from uuid import NAMESPACE_OID, uuid4, uuid5
 
 
 def generate_uuid(name: str = None) -> str:

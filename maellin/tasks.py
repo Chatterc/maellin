@@ -16,13 +16,11 @@
 from abc import ABCMeta, abstractclassmethod
 from functools import partial
 from inspect import signature
-from maellin.logger import LoggingMixin
+from typing import Any, Callable, List, Literal, Tuple, TypeVar
+
 from maellin.exceptions import CompatibilityException, MissingTypeHintException
+from maellin.logger import LoggingMixin
 from maellin.utils import generate_uuid
-
-
-from typing import Any, Callable, TypeVar, List, Tuple, Literal
-
 
 Task = TypeVar('Task')
 Pipeline = TypeVar('Pipeline')
