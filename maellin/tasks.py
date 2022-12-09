@@ -112,7 +112,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
         _val = any(other.__output__() is arg for arg in self.__input__())
         # if the output is Any, validation is not expected to work properly
         if other.__output__() is Any:
-            error = f"Cannot check compatibility with previous task {other.func.__name__} when return type is 'Any'"
+            error = f"Cannot check compatibility with previous task {other.func.__name__} when return is type 'Any'"
             raise CompatibilityException(error)
 
         if _val is not True:
