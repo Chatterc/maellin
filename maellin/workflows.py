@@ -299,7 +299,7 @@ class Pipeline(DAG, LoggingMixin):
         # Start execution of Tasks
         self._log.info('Starting Execution')
         executor.start()
-        executor.end()
+        executor.shutdown()
 
     def submit(
             self,
