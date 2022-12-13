@@ -50,7 +50,7 @@ The __DVD Rental Database ERD__ can be found in the `docs` folder of this reposi
 ### Objectives
 The main objective of this lab is to implement an ETL process in python to create a __Star-Schema__ in a Data Warehouse that looks like the following:
 
-![img](\../static/img/star-schema.jpg)
+![img](\../static/img/samples/star-schema.jpg)
 
 Put simply, we need to:
 1. _extract_ data from a OLTP database called `dvdrental`
