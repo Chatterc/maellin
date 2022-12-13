@@ -5,11 +5,11 @@ __Extract, Transform & Load__ (ETL) is a process that extracts, transforms, and 
 
 ### What is our Use Case?
 
-__Problem Statement__:  "We need to perfrom some analytics on data from a Movie rental store"
-- The Data is stored in a highly normalized transactional database for online transactional processing. 
-- We need to model the transactional data so that it is optimized for analytic queries using a __star-schema__.
+__Problem Statement__:  "We need to perfrom some analytics on data from a movie rental store"
+- The data is stored in a highly normalized transactional database for online transactional processing. 
+- We need to model the transactional data so that it is optimized for analytic queries using a database pattern called a __star-schema__.
 - To implement this data model we need to a data processing pipeline that can __Extract, Transform, and Load__ data into a Data Warehouse.
-- Linear Data Processing Pipelines are insufficient, __WE NEED A DAG__.
+- Linear Data Processing Pipelines are insufficient for managing the number of dependencies for our use case, __WE NEED A DAG!__
 
 
 ### About the DVD Rental Database
@@ -80,7 +80,7 @@ __Dimension Table: CUSTOMER__
 - `email` is the customer's email 
 
 __Dimension Table: DATE__
-- `sk_date` is unique `rental_date` converted into an integer so it can be used as a primary key 
+- `sk_date` is unique `rental_date` that has been converted into an integer so it can be used as a primary key 
 - `quarter` is a column formatted from `rental_date` for quarter of the year
 - `year` is a column formatted from `rental_date` for year
 - `month` is a column formatted from `rental_date` for month of the year
@@ -126,6 +126,7 @@ __Dimension Table: FILM__
 My project consist of two main features:
 1. __Authoring__ - The ability to compose a DAG based workflow that is debugger friendly and strongly typed. 
 <br>
+
 2. __Scheduling & Execution__ - The ability to schedule authored DAGs as batch processing jobs.
 
 ## How Did I Develop My Python Modules?
@@ -145,9 +146,3 @@ __Executor__ - The executor  is a python class that instantiates a set number of
 __DAG__ - This is a python class that encapsulates a networkx DiGraph. It implements several networkx functions for working with DAGs.
 
 __Workflow__ - This python class is the main entry point for authoring an configuring how to execute a DAG. It has the ability to add Tasks to the DAG and serialize the DAG for processing by the Scheduler.
-
-
-## How Should You Organize your `main.py`
-
-The `main.py` is the entry point to our ETL program. It contains all the ETL code that needs to be executed to implement our star-schema. __We import our modules__ into the `main.py` to be used to prepare and execute our ETL code.
-
