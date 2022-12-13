@@ -1,10 +1,9 @@
 ### Introduction
-This walkthrough uses the DVD Rental Database as a way to demonstrate how Maellin workflows work.
+This walkthrough uses Maellin.io workflows with the DVD Rental Database to construct a star-schema using ETL.
 
-
-
-### What is our Final Project?
 __Extract, Transform & Load__ (ETL) is a process that extracts, transforms, and loads data from one or multiple sources to a __data warehouse__ or other unified data repository.
+
+### What is our Use Case?
 
 __Problem Statement__:  "We need to perfrom some analytics on data from a Movie rental store"
 - The Data is stored in a highly normalized transactional database for online transactional processing. 

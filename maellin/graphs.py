@@ -15,17 +15,13 @@
 
 from typing import Dict, List, Type
 from uuid import uuid4
+
+from networkx import (MultiDiGraph, compose, is_directed_acyclic_graph,
+                      is_empty, is_weakly_connected, number_of_nodes,
+                      topological_sort)
+
 from maellin.exceptions import CircularDependencyError, MissingDependencyError
 from maellin.tasks import Task
-from networkx import (
-    MultiDiGraph,
-    compose,
-    is_directed_acyclic_graph,
-    is_weakly_connected,
-    number_of_nodes,
-    is_empty,
-    topological_sort
-)
 
 
 class DAG:

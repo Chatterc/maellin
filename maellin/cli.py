@@ -18,8 +18,8 @@
 #
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from __future__ import annotations
-import argparse
 import sys
 from typing import Sequence
 import platform
@@ -38,7 +38,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     print(
         r"""
         Welcome to
-        __  __                  _   _   _               _
+         __  __                  _   _   _               _
         |  \/  |   __ _    ___  | | | | (_)  _ __       (_)   ___
         | |\/| |  / _` |  / _ \ | | | | | | | '_ \      | |  / _ \
         | |  | | | (_| | |  __/ | | | | | | | | | |  _  | | | (_) |

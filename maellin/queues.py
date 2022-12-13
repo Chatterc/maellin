@@ -14,8 +14,8 @@
 #   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from asyncio import Queue as AsyncQueue
-from queue import Queue as ThreadSafeQueue
 from multiprocessing import JoinableQueue
+from queue import Queue as ThreadSafeQueue
 from typing import Union
 
 

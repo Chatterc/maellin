@@ -75,6 +75,6 @@ class DefaultExecutor(BaseExecutor):
         self.worker = DefaultWorker(self.task_queue, self.result_queue)
         return self.worker.run()
 
-    def end(self):
+    def shutdown(self):
         """Removes the worker and results"""
         del self.worker

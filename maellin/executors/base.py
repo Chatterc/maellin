@@ -49,6 +49,6 @@ class BaseExecutor(AbstractBaseExecutor, LoggingMixin):
         """Starts workers for processing Tasks"""
         return
 
-    def stop(self):
+    def shutdown(self):
         """Stops Execution of Tasks"""
         return
