@@ -241,7 +241,7 @@ def build_fact_rental(
     return rental_df
 
 
-def sink_data(cursor: Cursor, df: pd.DataFrame, target: str):
+def sink_data(cursor: Cursor, df: pd.DataFrame, target: str) -> None:
     data = tuple(df.itertuples(index=False, name=None))
     query = PostgreSQLQuery \
         .into(target) \
@@ -259,91 +259,127 @@ def tear_down(cursor: Cursor) -> None:
 def main():
     # ============================ AUTHORING WORKFLOWS ============================ #
     # This section uses maellin's Pipeline class to author a DAG based workflow
-    # from the functions defined above. Note that merging multiple pipelines together
+    # from the python functions defined above. Note that merging multiple pipelines together
     # is natively supported. When a Task with a dependency is created, the Pipeline calls
-    # the Task.validate() on the dependency to check for compatibility before it is added 
-    # to the DAG. Compatibility checks rely on type hints for all provided arguments
-    # and return statements. To skip validation simply set skip_validation=True when
-    # creating the Task. 
+    # the Task.validate() method on the dependency to check for compatibility before
+    # it is added to the DAG. Compatibility checks rely on type hints for all provided
+    # arguments and return statements. To skip validation simply set skip_validation=True
+    # when creating the Task. 
     
     # Creates a DAG for all the DDL commands to execute to create schema and tables
     setup_workflow = Pipeline(
         steps=[
-            Task(create_cursor,
-                 kwargs={'path': DATABASE_CONFIG, 'section': SECTION},
-                 depends_on=None,
-                 name='create_cursor'),
-            Task(create_schema,
-                 kwargs={"schema_name": DW._name},
-                 depends_on=['create_cursor'],
-                 name='create_schema'),
-            Task(create_table,
-                 kwargs={'table_name': DW.customer, 'primary_key': 'sk_customer', 'definition': DIM_CUSTOMER},
-                 depends_on=['create_schema'],
-                 name='create_dim_customer'),
-            Task(create_table,
-                 kwargs={'table_name': DW.store, 'primary_key': 'sk_store', 'definition': DIM_STORE},
-                 depends_on=['create_schema'],
-                 name='create_dim_store'),
-            Task(create_table,
-                 kwargs={'table_name': DW.film, 'primary_key': 'sk_film', 'definition': DIM_FILM},
-                 depends_on=['create_schema'],
-                 name='create_dim_film'),
-            Task(create_table,
-                 kwargs={'table_name': DW.staff, 'primary_key': 'sk_staff', 'definition': DIM_STAFF},
-                 depends_on=['create_schema'],
-                 name='create_dim_staff'),
-            Task(create_table,
-                 kwargs={'table_name': DW.date, 'primary_key': 'sk_date', 'definition': DIM_DATE},
-                 depends_on=['create_schema'],
-                 name='create_dim_dates'),
-            Task(create_table,
-                 kwargs={
-                     'table_name': DW.factRental, 'definition': FACT_RENTAL,
-                     'foreign_keys': ['sk_customer', 'sk_store', 'sk_film', 'sk_staff', 'sk_date'],
-                     'reference_tables': [DW.customer, DW.store, DW.film, DW.staff, DW.date]},
-                 depends_on=['create_schema'],
-                 name='create_fact_rentals')
+            Task(
+                create_cursor,
+                depends_on=None,
+                name='create_cursor',
+                path=DATABASE_CONFIG,
+                section=SECTION
+            ),
+            Task(
+                create_schema,
+                depends_on=['create_cursor'],
+                name='create_schema',
+                schema_name=DW._name
+            ),
+            Task(
+                create_table,
+                depends_on=['create_schema'],
+                name='create_dim_customer',
+                table_name=DW.customer,
+                primary_key='sk_customer',
+                definition=DIM_CUSTOMER
+            ),
+            Task(
+                create_table,
+                depends_on=['create_schema'],
+                name='create_dim_store',
+                table_name=DW.store,
+                primary_key='sk_store',
+                definition=DIM_STORE
+            ),
+            Task(
+                create_table,
+                depends_on=['create_schema'],
+                name='create_dim_film',
+                table_name=DW.film,
+                primary_key='sk_film',
+                definition=DIM_FILM
+            ),
+            Task(
+                create_table,
+                depends_on=['create_schema'],
+                name='create_dim_staff',
+                table_name=DW.staff,
+                primary_key='sk_staff',
+                definition=DIM_STAFF
+            ),
+            Task(
+                create_table,
+                depends_on=['create_schema'],
+                name='create_dim_dates',
+                table_name=DW.date, 
+                primary_key='sk_date',
+                definition=DIM_DATE
+            ),
+            Task(
+                create_table,
+                depends_on=['create_schema'],
+                name='create_fact_rentals',
+                table_name=DW.factRental,
+                definition=FACT_RENTAL,
+                foreign_keys=['sk_customer', 'sk_store', 'sk_film', 'sk_staff', 'sk_date'],
+                reference_tables=[DW.customer, DW.store, DW.film, DW.staff, DW.date]
+            )
         ],
         type='default'
     )
+    
     cust_workflow = Pipeline(
         steps=[
-            Task(read_table,
-                 kwargs={'table_name': DVD.customer, 'columns': ('customer_id', 'first_name', 'last_name', 'email')},
-                 depends_on=['create_cursor'],
-                 name='extract_cust'
-                 ),
-            Task(build_dim_customer,
-                 depends_on=['extract_cust'],
-                 name='transf_cust'
-                 ),
-            Task(sink_data,
-                 depends_on=['create_cursor', 'transf_cust', 'create_dim_customer'],
-                 kwargs={'target': DW.customer},
-                 name='load_customer',
-                 skip_validation=True
-                 )
+            Task(
+                read_table,
+                depends_on=['create_cursor'],
+                name='extract_cust',
+                table_name=DVD.customer,
+                columns=('customer_id', 'first_name', 'last_name', 'email')
+            ),
+            Task(
+                build_dim_customer,
+                depends_on=['extract_cust'],
+                name='transf_cust'
+            ),
+            Task(
+                sink_data,
+                depends_on=['create_cursor', 'transf_cust', 'create_dim_customer'],
+                name='load_customer',
+                skip_validation=True,
+                target=DW.customer,
+            )
         ]
     )
 
     staff_workflow = Pipeline(
         steps=[
-            Task(read_table,
-                 kwargs={'table_name': DVD.staff, 'columns': ('staff_id', 'first_name', 'last_name', 'email')},
-                 depends_on=['create_cursor'],
-                 name='extract_staff'
-                 ),
-            Task(build_dim_staff,
-                 depends_on=['extract_staff'],
-                 name='transf_staff'
-                 ),
-            Task(sink_data,
-                 depends_on=['create_cursor', 'transf_staff', 'create_dim_staff'],
-                 kwargs={'target': DW.staff},
-                 name='load_staff',
-                 skip_validation=True
-                 )
+            Task(
+                read_table,
+                depends_on=['create_cursor'],
+                name='extract_staff',
+                table_name=DVD.staff,
+                columns=('staff_id', 'first_name', 'last_name', 'email'),
+            ),
+            Task(
+                build_dim_staff,
+                depends_on=['extract_staff'],
+                name='transf_staff'
+            ),
+            Task(
+                sink_data,
+                depends_on=['create_cursor', 'transf_staff', 'create_dim_staff'],
+                name='load_staff',
+                skip_validation=True,
+                target=DW.staff,
+            )
         ]
     )
 
@@ -351,104 +387,112 @@ def main():
         steps=[
             Task(
                 read_table,
-                kwargs={
-                    'table_name': DVD.rental,
-                    'columns': (
-                        'rental_id',
-                        'rental_date',
-                        'inventory_id',
-                        'staff_id',
-                        'customer_id')},
                 depends_on=['create_cursor'],
-                name='extract_dates'),
+                name='extract_dates',
+                table_name=DVD.rental,
+                columns=('rental_id', 'rental_date', 'inventory_id', 'staff_id', 'customer_id')
+            ),
             Task(
                 build_dim_dates,
                 depends_on=['extract_dates'],
-                name='transf_dates'),
+                name='transf_dates'
+            ),
             Task(
                 sink_data,
-                depends_on=[
-                    'create_cursor',
-                    'transf_dates',
-                    'create_dim_dates'],
-                kwargs={
-                    'target': DW.date},
+                depends_on=['create_cursor', 'transf_dates', 'create_dim_dates'],
                 name='load_dates',
-                skip_validation=True),
-        ])
+                skip_validation=True,
+                target=DW.date
+            ),
+        ]
+    )
 
     store_workflow = Pipeline(
         steps=[
-            Task(read_table,
-                 kwargs={'table_name': DVD.store, 'columns': ('store_id', 'manager_staff_id', 'address_id')},
-                 depends_on=['create_cursor'],
-                 name='extract_store'
-                 ),
-            Task(read_table,
-                 kwargs={'table_name': DVD.address, 'columns': ('address_id', 'address', 'city_id', 'district')},
-                 depends_on=['create_cursor'],
-                 name='extract_address'
-                 ),
-            Task(read_table,
-                 kwargs={'table_name': DVD.city, 'columns': ('city_id', 'city', 'country_id')},
-                 depends_on=['create_cursor'],
-                 name='extract_city'
-                 ),
-            Task(read_table,
-                 kwargs={'table_name': DVD.country, 'columns': ('country_id', 'country')},
-                 depends_on=['create_cursor'],
-                 name='extract_country'
-                 ),
-            Task(build_dim_store,
-                 depends_on=['extract_store', 'extract_staff', 'extract_address', 'extract_city', 'extract_country'],
-                 name='transf_store'
-                 ),
-            Task(sink_data,
-                 depends_on=['create_cursor', 'transf_store', 'create_dim_store'],
-                 kwargs={'target': DW.store},
-                 name='load_store',
-                 skip_validation=True
-                 ),
+            Task(
+                read_table,
+                depends_on=['create_cursor'],
+                name='extract_store',
+                table_name=DVD.store,
+                columns=('store_id', 'manager_staff_id', 'address_id')
+            ),
+            Task(
+                read_table,
+                depends_on=['create_cursor'],
+                name='extract_address',
+                table_name=DVD.address,
+                columns=('address_id', 'address', 'city_id', 'district'),
+            ),
+            Task(
+                read_table,
+                depends_on=['create_cursor'],
+                name='extract_city',
+                table_name=DVD.city,
+                columns=('city_id', 'city', 'country_id'),
+            ),
+            Task(
+                read_table,
+                depends_on=['create_cursor'],
+                name='extract_country',
+                table_name=DVD.country,
+                columns=('country_id', 'country')
+            ),
+            Task(
+                build_dim_store,
+                depends_on=['extract_store', 'extract_staff', 'extract_address', 'extract_city', 'extract_country'],
+                name='transf_store'
+            ),
+            Task(
+                sink_data,
+                depends_on=['create_cursor', 'transf_store', 'create_dim_store'],
+                name='load_store',
+                skip_validation=True,
+                target=DW.store
+            ),
         ]
     )
 
     film_workflow = Pipeline(
         steps=[
-            Task(read_table,
-                 kwargs={'table_name': DVD.film, 'columns': (
-                     'film_id', 'rating', 'length', 'rental_duration', 'language_id', 'release_year', 'title')},
-                 depends_on=['create_cursor'],
-                 name='extract_film'
-                 ),
-            Task(read_table,
-                 kwargs={'table_name': DVD.language, 'columns': ('language_id', 'name')},
-                 depends_on=['create_cursor'],
-                 name='extract_language'
-                 ),
-            Task(build_dim_film,
-                 depends_on=['extract_film', 'extract_language'],
-                 name='transf_film'
-                 ),
-            Task(sink_data,
-                 depends_on=['create_cursor', 'transf_film', 'create_dim_film'],
-                 kwargs={'target': DW.film},
-                 name='load_film',
-                 skip_validation=True
-                 )
+            Task(
+                read_table,
+                depends_on=['create_cursor'],
+                name='extract_film',
+                table_name=DVD.film,
+                columns= ('film_id', 'rating', 'length', 'rental_duration', 'language_id', 'release_year', 'title')
+            ),
+            Task(
+                read_table,
+                depends_on=['create_cursor'],
+                name='extract_language',
+                table_name=DVD.language, 
+                columns=('language_id', 'name')
+            ),
+            Task(
+                build_dim_film,
+                depends_on=['extract_film', 'extract_language'],
+                name='transf_film'
+            ),
+            Task(
+                sink_data,
+                depends_on=['create_cursor', 'transf_film', 'create_dim_film'],
+                name='load_film',
+                skip_validation=True,
+                target=DW.film,
+            )
         ]
     )
+    
+    
     fact_workflow = Pipeline(
         steps=[
             Task(
                 read_table,
-                kwargs={
-                    'table_name': DVD.inventory,
-                    'columns': (
-                        'inventory_id',
-                        'film_id',
-                        'store_id')},
                 depends_on=['create_cursor'],
-                name='extract_inventory'),
+                name='extract_inventory',
+                table_name=DVD.inventory,
+                columns=('inventory_id', 'film_id', 'store_id')
+            ),
             Task(
                 build_fact_rental,
                 depends_on=[
@@ -465,10 +509,13 @@ def main():
                     'create_cursor',
                     'transf_fact_rental',
                     'create_fact_rentals'],
-                kwargs={
-                    'target': DW.factRental},
                 name='load_fact_rental',
-                skip_validation=True)])
+                skip_validation=True,
+                target=DW.factRental
+            )
+        ]
+    )
+
 
     teardown_workflow = Pipeline(
         steps=[
@@ -502,16 +549,26 @@ def main():
 
     # ============================ COMPILATION ============================ #
     # This section composes the DAG from the provided Tasks
-    etl_workflow.compose()
-    plot_dag(etl_workflow.dag, savefig=False, path='dag.png')
+    workflow.compose()
+    
+    
+    # ============================  PLOTTING   ============================ #
+    # Maellin comes with some limited plots for visualizing DAGs with
+    # matplotlib and networkx
+    plot_dag(workflow.dag, savefig=False, path='dag.png')
 
-    etl_workflow.dump(filename='.dags/dvd_rental_workflow.pkl')
 
-    # ============================ ENQUEUE ============================ #
+    # ============================   ENQUEUE   ============================ #
     # Puts each task in a queue sorted in topological order
-    # etl_workflow.collect()
-
-    # ============================ EXECUTION ============================ #
+    workflow.collect() 
+   
+   
+    # ============================   SAVING    ============================ #
+    # Maellin uses CloudPickle for saving and loading DAGs to the scheduler
+    workflow.dump(filename='.dags/dvd_rental_workflow.pkl')
+    
+    
+    # ============================  EXECUTION  ============================ #
     # To run a Maellin Workflow locally using a single worker
     # This option is good for debugging before presisting the workflow
     # and submitting it to the scheduler.
