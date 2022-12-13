@@ -23,8 +23,8 @@ DVD = Schema('public')
 
 # ============================ TABLE DEFINITIONS ============================ #
 # This section is for providing table definitions for any DB objects that need
-# to be created in the pipeline. We currently use Pypika, which implements a builder 
-# pattern for constructing sql queries in python but other frameworks like 
+# to be created in the pipeline. We currently use Pypika, which implements a builder
+# pattern for constructing sql queries in python but other frameworks like
 # SQLAlchemy can also be used.
 
 # The fact Table of our star schema
@@ -264,8 +264,8 @@ def main():
     # the Task.validate() method on the dependency to check for compatibility before
     # it is added to the DAG. Compatibility checks rely on type hints for all provided
     # arguments and return statements. To skip validation simply set skip_validation=True
-    # when creating the Task. 
-    
+    # when creating the Task.
+
     # Creates a DAG for all the DDL commands to execute to create schema and tables
     setup_workflow = Pipeline(
         steps=[
@@ -318,7 +318,7 @@ def main():
                 create_table,
                 depends_on=['create_schema'],
                 name='create_dim_dates',
-                table_name=DW.date, 
+                table_name=DW.date,
                 primary_key='sk_date',
                 definition=DIM_DATE
             ),
@@ -334,7 +334,7 @@ def main():
         ],
         type='default'
     )
-    
+
     cust_workflow = Pipeline(
         steps=[
             Task(
@@ -459,13 +459,13 @@ def main():
                 depends_on=['create_cursor'],
                 name='extract_film',
                 table_name=DVD.film,
-                columns= ('film_id', 'rating', 'length', 'rental_duration', 'language_id', 'release_year', 'title')
+                columns=('film_id', 'rating', 'length', 'rental_duration', 'language_id', 'release_year', 'title')
             ),
             Task(
                 read_table,
                 depends_on=['create_cursor'],
                 name='extract_language',
-                table_name=DVD.language, 
+                table_name=DVD.language,
                 columns=('language_id', 'name')
             ),
             Task(
@@ -482,8 +482,7 @@ def main():
             )
         ]
     )
-    
-    
+
     fact_workflow = Pipeline(
         steps=[
             Task(
@@ -515,7 +514,6 @@ def main():
             )
         ]
     )
-
 
     teardown_workflow = Pipeline(
         steps=[
@@ -550,24 +548,20 @@ def main():
     # ============================ COMPILATION ============================ #
     # This section composes the DAG from the provided Tasks
     workflow.compose()
-    
-    
+
     # ============================  PLOTTING   ============================ #
     # Maellin comes with some limited plots for visualizing DAGs with
     # matplotlib and networkx
     plot_dag(workflow.dag, savefig=False, path='dag.png')
 
-
     # ============================   ENQUEUE   ============================ #
     # Puts each task in a queue sorted in topological order
-    workflow.collect() 
-   
-   
+    workflow.collect()
+
     # ============================   SAVING    ============================ #
     # Maellin uses CloudPickle for saving and loading DAGs to the scheduler
     workflow.dump(filename='.dags/dvd_rental_workflow.pkl')
-    
-    
+
     # ============================  EXECUTION  ============================ #
     # To run a Maellin Workflow locally using a single worker
     # This option is good for debugging before presisting the workflow
