@@ -30,6 +30,8 @@ This project structure should be used to help contributors understand where to "
 
 ## __Getting Started__
 
+_**Note**: All tutorials and samples are based on the DVD Rental Sample Database for Postgresql_
+
 ### __Basic Usage__
 Maellin.io has two primary user flows 
 1. Authoring - The process of composing a DAG from various tasks.
@@ -37,16 +39,18 @@ Maellin.io has two primary user flows
 
 __Authoring__ provides a debugging friendly experience for users to compose a DAG of Tasks. The primary entry point for authoring a DAG is the `Pipeline` class using the `steps` argument
 
-The following example highlights how to author a pipeline with a single task using the Maellin PostgresClient to return a cursor object
+The following example highlights how to author a simple pipeline consisting of a single task. The task uses the Maellin PostgresClient to return a DBAPI compatible cursor object for Postgresql.
 ```python
 from maellin.workflows import Pipeline
 from maellin.tasks import Task
 from maellin.clients.postgres import PostgresClient
 
+from typing import TypeVar
+
 
 DATABASE_CONFIG = '.config\.postgres'
 SECTION = 'postgresql'
-
+Cursor = TypeVar('Cursor')
 
 # A user-defined python function that uses the Maellin PostgresClient
 # to create a cursor object
@@ -57,15 +61,18 @@ def create_cursor(path:str, section:str) -> Cursor:
     return cursor
 
 # The Pipeline class is the entry point for adding Tasks into the DAG. 
-# Any keyword arguments required that you provided will bind to the 
-# callable when the is executed. 
+# Any parameters you need to provide can be passed as keyword arguments to the task
+# all kwargs will be bind to the callable when the is executed. 
 workflow = Pipeline(
     steps=[
         Task(
             func=create_cursor, 
-            kwargs={'path': DATABASE_CONFIG, 'section': SECTION}, 
             depends_on=None, 
-            name='create_cursor'
+            name='create_cursor',
+            desc="Creates the Database Cursor",
+            skip_validation=False,
+            path=DATABASE_CONFIG, 
+            section=SECTION, 
         )
     ]
 )
