@@ -177,7 +177,7 @@ class Pipeline(DAG, LoggingMixin):
         """
 
         with open(filename, 'rb') as f:
-            dag = cpickle.load(f)
+            dag = cpickle.load(f, encoding='bytes')
             self.dag = dag
         return self
 

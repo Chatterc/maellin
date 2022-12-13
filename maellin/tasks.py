@@ -73,7 +73,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
             return_annotation : type annotation for the return statement of Callable
         """
         try:
-            return_annotation = self.func.__annotations__['return']
+            return_annotation = self.func.func.__annotations__['return']
             return return_annotation
         except BaseException:
             raise MissingTypeHintException(f"No type hint was provided for {self.func.__name__}'s return")
