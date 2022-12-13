@@ -1,14 +1,19 @@
+# This Project is actively under development and is not ready for production. Check back soon for updates!
+
 # ![img](static/img/logos/logo_01.png)
+
+
+
 
 ---
 
-## __About Maellin.io__
+## __About__
 Maellin.io is a lightweight workflows package for developing, scheduling, and monitor data processing in pure python. It comes with a rich set of APIs for connecting to a myraid of data sources and orchestrating tasks using directed acyclic graphs (DAGs).
 
 ---
 
-## __Maellin.io Philosophy__
-Citizen Developers & Engineers are often asked to tackle use cases that require quick setup and ease of use to solve data problems quickly. The modern ETL stack is often inundated with packages that require massive amounts of setup, configuration and endless black holes of documentation before a solution can be developed. Too often, novice or intermediate users lack the knowledge and expertise to write their own reusable components for orchestrating data intesive tasks or end up over engineering a solution using a larger framework. Maellin.io aims to provide a ETL framework for small to medium sized workflows, with a focus on helping citizen devs and engineers catch bugs before they reach production. Maellin.io exposes developers to a rich set of APIs and ETL concepts that will help them graduate steadily to more complex projects and tools as their use cases and expertise grow. 
+## __Philosophy__
+Citizen Developers & Engineers are often asked to tackle use cases that require quick setup and ease of use to solve data problems quickly. The modern ETL stack is often inundated with packages that require massive amounts of setup, configuration and endless black holes of documentation before a solution can be developed. Too often, novice or intermediate users lack the knowledge and expertise to write their own reusable components for orchestrating data intensive pipelines or end up over engineering a solution using a larger framework. Maellin.io aims to provide a ETL framework for small to medium sized workflows, with a focus on helping citizen devs and engineers catch bugs before they reach production. Maellin.io exposes developers to a rich set of APIs and ETL concepts that will help them graduate steadily to more complex projects and tools as their use cases and expertise grow. 
 
 ---
 ## __Project Structure__
@@ -30,12 +35,19 @@ This project structure should be used to help contributors understand where to "
 
 ## __Getting Started__
 
-_**Note**: All tutorials and samples are based on the DVD Rental Sample Database for Postgresql_
+#### Installation
+
+```bash
+pip install maellin
+```
 
 ### __Basic Usage__
-Maellin.io has two primary user flows 
+_**Note**: All tutorials and samples are based on the DVD Rental Sample Database for Postgresql_
+
+Maellin.io has three primary user flows 
 1. Authoring - The process of composing a DAG from various tasks.
-2. Scheduling - Executes DAG pipelines based on a set schedule.
+2. Scheduling - The process of scheduling a DAG for execution based on a schedule.
+3. Monitoring - The ability to observe past, current and upcoming jobs.
 
 __Authoring__ provides a debugging friendly experience for users to compose a DAG of Tasks. The primary entry point for authoring a DAG is the `Pipeline` class using the `steps` argument
 
@@ -53,7 +65,7 @@ SECTION = 'postgresql'
 Cursor = TypeVar('Cursor')
 
 # A user-defined python function that uses the Maellin PostgresClient
-# to create a cursor object
+# to create a DBAPI compatiable cursor object
 def create_cursor(path:str, section:str) -> Cursor:
     client = PostgresClient()
     conn = client.connect_from_config(path, section, autocommit=True)
@@ -84,30 +96,51 @@ workflow.run()
 See the full authoring [sample](/samples/00_authoring_workflows.py) that uses Maellin to to create a star-schema here.
 
 
-#### Installation
 
-```bash
-pip install maellin
-```
 #### Using Tasks
-#### Using Workflows
+#TODO
+
+#### Using Pipelines
+#TODO
+
+#### Using Database Clients
+#TODO
+
 #### Choosing an Executor
-#### Using Single or Multiple Workers
+#TODO 
+
+#### Configuring Jobs for Single or Multiple Workers
+#TODO
+
 #### Using the Scheduler
+#TODO
 
 ### __Advanced Usage__
+
 #### Using the Maellin.io CLI
+#TODO
+
+#### Using Maellin.io with Celery
+#TODO
+
+#### Using Maellin.io with Redis
+#TODO
+
+#### Using Maellin.io Tracking Server
+#TODO
+
+#### Using Maellin.io with FastAPI
+#TODO
 
 ---
 ## __How to Contribute__
-
+#TODO
 ---
 
 ## __How to Run Tests__
-
+#TODO
 ---
 
 ## __Join the Conversation__
-- __Slack Channel__
-- __Discord__
+#TODO
 
