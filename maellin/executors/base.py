@@ -30,7 +30,7 @@ class AbstractBaseExecutor(metaclass=ABCMeta):
         return NotImplementedError('Abstract Method that needs to be implemented by the subclass')
 
     @abstractclassmethod
-    def stop(self):
+    def shutdown(self):
         """Executors may need to get things started."""
         return NotImplementedError('Abstract Method that needs to be implemented by the subclass')
 

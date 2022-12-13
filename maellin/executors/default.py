@@ -54,7 +54,7 @@ class DefaultWorker(LoggingMixin):
                 inputs = tuple()
 
             # Run the task with instructions
-            _task.run(inputs)
+            _task.run(*inputs)
             _task.update_status('Completed')
 
             # Put the results of the complete task in the result queue
