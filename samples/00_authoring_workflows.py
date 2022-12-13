@@ -264,9 +264,11 @@ def main():
     # the Task.validate() method on the dependency to check for compatibility before
     # it is added to the DAG. Compatibility checks rely on type hints for all provided
     # arguments and return statements. To skip validation simply set skip_validation=True
-    # when creating the Task.
+    # when creating the Task. 
 
     # Creates a DAG for all the DDL commands to execute to create schema and tables
+    # Workflows can be in the main or body of a .py script. They can even be put in 
+    # python modules and imported into another python program.
     setup_workflow = Pipeline(
         steps=[
             Task(
@@ -353,7 +355,6 @@ def main():
                 sink_data,
                 depends_on=['create_cursor', 'transf_cust', 'create_dim_customer'],
                 name='load_customer',
-                skip_validation=True,
                 target=DW.customer,
             )
         ]
@@ -377,7 +378,6 @@ def main():
                 sink_data,
                 depends_on=['create_cursor', 'transf_staff', 'create_dim_staff'],
                 name='load_staff',
-                skip_validation=True,
                 target=DW.staff,
             )
         ]
@@ -401,7 +401,6 @@ def main():
                 sink_data,
                 depends_on=['create_cursor', 'transf_dates', 'create_dim_dates'],
                 name='load_dates',
-                skip_validation=True,
                 target=DW.date
             ),
         ]
@@ -446,7 +445,6 @@ def main():
                 sink_data,
                 depends_on=['create_cursor', 'transf_store', 'create_dim_store'],
                 name='load_store',
-                skip_validation=True,
                 target=DW.store
             ),
         ]
@@ -477,7 +475,6 @@ def main():
                 sink_data,
                 depends_on=['create_cursor', 'transf_film', 'create_dim_film'],
                 name='load_film',
-                skip_validation=True,
                 target=DW.film,
             )
         ]
@@ -509,7 +506,6 @@ def main():
                     'transf_fact_rental',
                     'create_fact_rentals'],
                 name='load_fact_rental',
-                skip_validation=True,
                 target=DW.factRental
             )
         ]
@@ -517,17 +513,19 @@ def main():
 
     teardown_workflow = Pipeline(
         steps=[
-            Task(tear_down,
-                 depends_on=[
-                     'create_cursor',
-                     film_workflow,
-                     store_workflow,
-                     dates_workflow,
-                     staff_workflow,
-                     cust_workflow,
-                     fact_workflow],
-                 name='tear_down',
-                 skip_validation=True)
+            Task(
+                tear_down,
+                name='tear_down',
+                depends_on=[
+                    'create_cursor',
+                    'load_film', # comes from film_workflow,
+                    'load_store', # comes from store_workflow,
+                    'load_dates', # comes from dates_workflow,
+                    'load_staff', # comes from staff_workflow,
+                    'load_customer', # comes from cust_workflow,
+                    'load_fact_rental', # come from fact_workflow
+                ],
+            )
         ]
     )
 
@@ -552,7 +550,7 @@ def main():
     # ============================  PLOTTING   ============================ #
     # Maellin comes with some limited plots for visualizing DAGs with
     # matplotlib and networkx
-    plot_dag(workflow.dag, savefig=False, path='dag.png')
+    plot_dag(workflow.dag, savefig=True, path='sample_dag.png')
 
     # ============================   ENQUEUE   ============================ #
     # Puts each task in a queue sorted in topological order
