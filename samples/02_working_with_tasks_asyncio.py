@@ -1,10 +1,6 @@
 import time
 import asyncio
 
-<<<<<<< HEAD:samples/02a_working_with_tasks_asyncio.py
-os.chdir("./../")
-=======
->>>>>>> 855b4aad0b57b3d21f0b1593be29275d73a9226f:samples/working_with_asyncio.py
 from maellin.tasks import Task
 from maellin.queues import QueueFactory
 
