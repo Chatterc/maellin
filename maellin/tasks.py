@@ -20,7 +20,7 @@ from typing import Any, Callable, List, Literal, Tuple, TypeVar
 
 from maellin.exceptions import CompatibilityException, MissingTypeHintException
 from maellin.logger import LoggingMixin
-from maellin.utils import generate_uuid
+from maellin.utils import generate_uuid, wrapped_partial
 
 Task = TypeVar('Task')
 Pipeline = TypeVar('Pipeline')
@@ -73,7 +73,7 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
             return_annotation : type annotation for the return statement of Callable
         """
         try:
-            return_annotation = self.func.func.__annotations__['return']
+            return_annotation = self.func.__annotations__['return']
             return return_annotation
         except BaseException:
             raise MissingTypeHintException(f"No type hint was provided for {self.func.__name__}'s return")
@@ -109,7 +109,9 @@ class BaseTask(AbstractBaseTask, LoggingMixin):
             Boolean: Returns True if tasks are compatible
         """
 
-        _val = any(other.__output__() is arg for arg in self.__input__())
+        # If output is None we assume it should be an ignored as an input argument
+        _val = any(other.__output__() is arg for arg in self.__input__() + [None])
+        
         # if the output is Any, validation is not expected to work properly
         if other.__output__() is Any:
             error = f"Cannot check compatibility with previous task {other.func.__name__} when return is type 'Any'"
@@ -142,7 +144,7 @@ class Task(BaseTask):
             skip_validation: bool = False,
             **kwargs) -> None:
 
-        super().__init__(func=partial(func, **kwargs))
+        super().__init__(func=wrapped_partial(func, **kwargs))
         self.depends_on = depends_on
         self.skip_validation = skip_validation
         self.name = name

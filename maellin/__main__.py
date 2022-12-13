@@ -1,9 +1,4 @@
-#   Maellin.io is a lightweight workflows package for
-#   developing, scheduling, and monitor data processing
-#   workflows in pure python. It comes with a rich set
-#   of APIs for connecting to a myraid of data sources
-#   and orchestrating tasks using directed acyclic graphs (DAGs).
-#   Copyright (C) 2022  Carl Chatterton
+#   Copyright (C) 2022  Carl Chatterton. All Rights Reserved.
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
