@@ -1,5 +1,3 @@
-# This Project is actively under development and is not ready for production. Check back soon for updates!
-
 # ![img](static/img/logos/logo_01.png)
 
 
